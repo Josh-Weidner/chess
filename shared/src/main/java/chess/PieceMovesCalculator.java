@@ -130,6 +130,10 @@ class QueenMovesCalculator implements PieceMovesCalculator {
     }
 }
 
+/**
+ * Returns a collection of all possible
+ * rook moves
+ */
 class RookMovesCalculator implements PieceMovesCalculator {
     private static final int[][] DIRECTIONS = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1} // Vertical and horizontal directions
