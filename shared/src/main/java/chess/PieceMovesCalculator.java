@@ -45,6 +45,13 @@ class PawnMovesCalculator implements PieceMovesCalculator {
 
     }
 
+    /**
+     * Returns possible promotions of pawn and moves
+     *
+     * @param position = starting position of the pawn
+     * @param chessMoves = the collection of chess moves to add to
+     * @param newPosition = the new position that we want to move the pawn
+     */
     private void getPawnPromotions(ChessPosition position, Collection<ChessMove> chessMoves, ChessPosition newPosition) {
         if (newPosition.getRow() == 1 || newPosition.getRow() == 8) {
             // Move and Promote
