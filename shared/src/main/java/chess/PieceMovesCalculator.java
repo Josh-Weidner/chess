@@ -7,6 +7,10 @@ public interface PieceMovesCalculator {
     Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position);
 }
 
+/**
+ * Returns a collection of all possible
+ * pawn moves not including putting pawn
+ */
 class PawnMovesCalculator implements PieceMovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
@@ -47,7 +51,7 @@ class PawnMovesCalculator implements PieceMovesCalculator {
 
     /**
      * Returns possible promotions of pawn and moves
-     *
+     * <p>
      * @param position = starting position of the pawn
      * @param chessMoves = the collection of chess moves to add to
      * @param newPosition = the new position that we want to move the pawn
