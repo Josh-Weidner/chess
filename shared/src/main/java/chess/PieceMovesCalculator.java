@@ -110,6 +110,10 @@ class BishopMovesCalculator implements PieceMovesCalculator {
     }
 }
 
+/**
+ * Returns a collection of all possible
+ * queen moves
+ */
 class QueenMovesCalculator implements PieceMovesCalculator {
     private static final int[][] DIRECTIONS = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1},  // Vertical and horizontal
