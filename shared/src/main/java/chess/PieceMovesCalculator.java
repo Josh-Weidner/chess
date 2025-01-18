@@ -91,6 +91,10 @@ class KingMovesCalculator implements PieceMovesCalculator {
     }
 }
 
+/**
+ * Returns a collection of all possible
+ * bishop moves
+ */
 class BishopMovesCalculator implements PieceMovesCalculator {
     private static final int[][] DIRECTIONS = {
             {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // Diagonal directions
