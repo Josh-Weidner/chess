@@ -149,6 +149,10 @@ class RookMovesCalculator implements PieceMovesCalculator {
     }
 }
 
+/**
+ * Returns a collection of all possible
+ * knight moves
+ */
 class KnightMovesCalculator implements PieceMovesCalculator {
     private static final int[][] MOVES = {
             {2, 1}, {2, -1}, {1, 2}, {1, -2},
