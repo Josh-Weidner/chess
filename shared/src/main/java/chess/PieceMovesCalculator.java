@@ -9,7 +9,7 @@ public interface PieceMovesCalculator {
 
 /**
  * Returns a collection of all possible
- * pawn moves not including putting pawn
+ * pawn moves
  */
 class PawnMovesCalculator implements PieceMovesCalculator {
     @Override
@@ -71,6 +71,10 @@ class PawnMovesCalculator implements PieceMovesCalculator {
     }
 }
 
+/**
+ * Returns a collection of all possible
+ * king moves
+ */
 class KingMovesCalculator implements PieceMovesCalculator {
     private static final int[][] MOVES = {
             {1, 0}, {1, 1}, {0, 1}, {-1, -1},
