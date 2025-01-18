@@ -77,7 +77,7 @@ class KingMovesCalculator implements PieceMovesCalculator {
 }
 
 class BishopMovesCalculator implements PieceMovesCalculator {
-    private static final int[][] MOVES = {
+    private static final int[][] DIRECTIONS = {
             {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // Diagonal directions
     };
 
@@ -85,14 +85,14 @@ class BishopMovesCalculator implements PieceMovesCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         if (board.getPiece(position) != null) {
             ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateDirectionalMoves(board, position, MOVES, team);
+            return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
         }
         return new ArrayList<>();
     }
 }
 
 class QueenMovesCalculator implements PieceMovesCalculator {
-    private static final int[][] MOVES = {
+    private static final int[][] DIRECTIONS = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1},  // Vertical and horizontal
             {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // Diagonal
     };
@@ -101,14 +101,14 @@ class QueenMovesCalculator implements PieceMovesCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         if (board.getPiece(position) != null) {
             ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateDirectionalMoves(board, position, MOVES, team);
+            return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
         }
         return new ArrayList<>();
     }
 }
 
 class RookMovesCalculator implements PieceMovesCalculator {
-    private static final int[][] MOVES = {
+    private static final int[][] DIRECTIONS = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1} // Vertical and horizontal directions
     };
 
@@ -116,7 +116,7 @@ class RookMovesCalculator implements PieceMovesCalculator {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         if (board.getPiece(position) != null) {
             ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateDirectionalMoves(board, position, MOVES, team);
+            return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
         }
         return new ArrayList<>();
     }
