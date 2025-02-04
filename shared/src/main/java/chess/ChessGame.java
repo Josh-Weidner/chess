@@ -108,6 +108,27 @@ public class ChessGame {
     }
 
     /**
+     * Gets all valid moves for a team
+     *
+     * @param teamColor the team to get valid moves for
+     * @return Set of valid moves for requested team
+     */
+    public Collection<ChessMove> allPossibleMoves(ChessGame.TeamColor teamColor) {
+        ArrayList<ChessMove> possibleMoves = new ArrayList<>();
+        for (int i = 0; i < chessBoard.chessBoard.length; i++) {
+            for (int j = 0; j < chessBoard.chessBoard[i].length; j++) {
+                ChessPosition position = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = chessBoard.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> pieceMoves = piece.pieceMoves(chessBoard, position);
+                    possibleMoves.addAll(pieceMoves);
+                }
+            }
+        }
+        return possibleMoves;
+    }
+
+    /**
      * Makes a move in a chess game
      *
      * @param move chess move to preform
@@ -131,7 +152,7 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         TeamColor enemy = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         ChessPosition kingPosition = chessBoard.getKing(teamColor);
-        Collection<ChessMove> enemyMoves = allValidMoves(enemy);
+        Collection<ChessMove> enemyMoves = allPossibleMoves(enemy);
         for (ChessMove enemyMove: enemyMoves) {
             if (enemyMove.getEndPosition().equals(kingPosition)) {
                 return true;
