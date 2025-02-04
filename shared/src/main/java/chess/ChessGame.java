@@ -60,7 +60,15 @@ public class ChessGame {
         for (ChessMove move : moves) {
             // Create a copy of the board
             ChessGame tempGame = new ChessGame();
-            tempGame.chessBoard = chessBoard;
+            for (int i = 0; i < chessBoard.chessBoard.length; i++) {
+                for (int j = 0; j < chessBoard.chessBoard[i].length; j++) {
+                    ChessPosition position = new ChessPosition(i + 1, j + 1);
+                    ChessPiece newPiece = chessBoard.getPiece(position);
+                    if (newPiece != null) {
+                        tempGame.chessBoard.addPiece(position, newPiece);
+                    }
+                }
+            }
 
             // Apply the move on the temp board
             try {
@@ -76,6 +84,27 @@ public class ChessGame {
         }
 
         return validMoves;
+    }
+
+    /**
+     * Gets all valid moves for a team
+     *
+     * @param teamColor the team to get valid moves for
+     * @return Set of valid moves for requested team
+     */
+    public Collection<ChessMove> allValidMoves(ChessGame.TeamColor teamColor) {
+        ArrayList<ChessMove> legalMoves = new ArrayList<>();
+        for (int i = 0; i < chessBoard.chessBoard.length; i++) {
+            for (int j = 0; j < chessBoard.chessBoard[i].length; j++) {
+                ChessPosition position = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = chessBoard.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> pieceMoves = validMoves(position);
+                    legalMoves.addAll(pieceMoves);
+                }
+            }
+        }
+        return legalMoves;
     }
 
     /**
@@ -117,7 +146,7 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         TeamColor enemy = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         ChessPosition kingPosition = chessBoard.getKing(teamColor);
-        Collection<ChessMove> enemyMoves = chessBoard.getLegalMoves(enemy);
+        Collection<ChessMove> enemyMoves = allValidMoves(enemy);
         for (ChessMove enemyMove: enemyMoves) {
             if (enemyMove.getEndPosition().equals(kingPosition)) {
                 return true;
@@ -141,7 +170,7 @@ public class ChessGame {
         ChessPosition kingPosition = chessBoard.getKing(teamColor);
         ChessPiece kingPiece = chessBoard.getPiece(kingPosition);
         Collection<ChessMove> kingMoves = kingPiece.pieceMoves(chessBoard, kingPosition);
-        Collection<ChessMove> enemyMoves = chessBoard.getLegalMoves(enemy);
+        Collection<ChessMove> enemyMoves = allValidMoves(enemy);
         for (ChessMove kingMove: kingMoves) {
             boolean canMove = true;
             for (ChessMove enemyMove: enemyMoves) {
@@ -166,7 +195,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         if (!isInCheck(teamColor)) {
-            return chessBoard.getLegalMoves(teamColor).isEmpty();
+            return allValidMoves(teamColor).isEmpty();
         }
         return false;
     }

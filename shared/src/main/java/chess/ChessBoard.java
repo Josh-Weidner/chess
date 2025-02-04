@@ -51,21 +51,6 @@ public class ChessBoard {
         return null;
     }
 
-    public Collection<ChessMove> getLegalMoves(ChessGame.TeamColor teamColor) {
-        ArrayList<ChessMove> legalMoves = new ArrayList<>();
-        for (int i = 0; i < chessBoard.length; i++) {
-            for (int j = 0; j < chessBoard[i].length; j++) {
-                if (chessBoard[i][j].getTeamColor() == teamColor) {
-                    ChessPosition position = new ChessPosition(i + 1, j + 1);
-                    ChessPiece piece = getPiece(position);
-                    Collection<ChessMove> pieceMoves = piece.pieceMoves(this, position);
-                    legalMoves.addAll(pieceMoves);
-                }
-            }
-        }
-        return legalMoves;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
