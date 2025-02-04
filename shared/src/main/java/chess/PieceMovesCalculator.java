@@ -83,11 +83,8 @@ class KingMovesCalculator implements PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        if (board.getPiece(position) != null) {
-            ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateFixedRangeMoves(board, position, MOVES, team);
-        }
-        return new ArrayList<>();
+        ChessGame.TeamColor team = board.getPiece(position).pieceColor;
+        return ChessMoveUtils.calculateFixedRangeMoves(board, position, MOVES, team);
     }
 }
 
@@ -102,11 +99,8 @@ class BishopMovesCalculator implements PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        if (board.getPiece(position) != null) {
-            ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
-        }
-        return new ArrayList<>();
+        ChessGame.TeamColor team = board.getPiece(position).pieceColor;
+        return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
     }
 }
 
@@ -122,11 +116,8 @@ class QueenMovesCalculator implements PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        if (board.getPiece(position) != null) {
-            ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
-        }
-        return new ArrayList<>();
+        ChessGame.TeamColor team = board.getPiece(position).pieceColor;
+        return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
     }
 }
 
@@ -141,11 +132,8 @@ class RookMovesCalculator implements PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        if (board.getPiece(position) != null) {
-            ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
-        }
-        return new ArrayList<>();
+        ChessGame.TeamColor team = board.getPiece(position).pieceColor;
+        return ChessMoveUtils.calculateDirectionalMoves(board, position, DIRECTIONS, team);
     }
 }
 
@@ -161,11 +149,8 @@ class KnightMovesCalculator implements PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        if (board.getPiece(position) != null) {
-            ChessGame.TeamColor team = board.getPiece(position).pieceColor;
-            return ChessMoveUtils.calculateFixedRangeMoves(board, position, MOVES, team);
-        }
-        return new ArrayList<>();
+        ChessGame.TeamColor team = board.getPiece(position).pieceColor;
+        return ChessMoveUtils.calculateFixedRangeMoves(board, position, MOVES, team);
     }
 }
 
