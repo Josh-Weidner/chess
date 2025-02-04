@@ -60,6 +60,7 @@ public class ChessGame {
         for (ChessMove move : moves) {
             // Create a copy of the board
             ChessGame tempGame = new ChessGame();
+            tempGame.setTeamTurn(getTeamTurn());
             for (int i = 0; i < chessBoard.chessBoard.length; i++) {
                 for (int j = 0; j < chessBoard.chessBoard[i].length; j++) {
                     ChessPosition position = new ChessPosition(i + 1, j + 1);
@@ -72,7 +73,7 @@ public class ChessGame {
 
             // Apply the move on the temp board
             try {
-                tempGame.makeMove(move);
+                tempGame.makeTempMove(move);
             } catch (InvalidMoveException e){
                 continue;
             }
@@ -139,6 +140,18 @@ public class ChessGame {
         if (getTeamTurn() != piece.getTeamColor()) {
             throw new InvalidMoveException();
         }
+        chessBoard.addPiece(move.getStartPosition(), null);
+        chessBoard.addPiece(move.getEndPosition(), piece);
+    }
+
+    /**
+     * Makes a move in a temp chess game
+     *
+     * @param move temp chess move to preform
+     * @throws InvalidMoveException if move is invalid
+     */
+    public void makeTempMove(ChessMove move) throws InvalidMoveException{
+        ChessPiece piece = chessBoard.getPiece(move.getStartPosition());
         chessBoard.addPiece(move.getStartPosition(), null);
         chessBoard.addPiece(move.getEndPosition(), piece);
     }
