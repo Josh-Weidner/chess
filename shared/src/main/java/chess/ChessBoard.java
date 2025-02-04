@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -40,10 +38,18 @@ public class ChessBoard {
         return chessBoard[position.getRow() - 1][position.getColumn() - 1];
     }
 
+    /**
+     * Gets team's king position
+     *
+     * @param teamColor The team we want the King for
+     * @return The position of the King, or null, but that should never happen
+     */
     public ChessPosition getKing(ChessGame.TeamColor teamColor) {
         for (int i = 0; i < chessBoard.length; i++) {
             for (int j = 0; j < chessBoard[i].length; j++) {
-                if (chessBoard[i][j].getTeamColor() == teamColor && chessBoard[i][j].getPieceType() == ChessPiece.PieceType.KING) {
+                ChessPosition position = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
                     return new ChessPosition(i + 1, j + 1);
                 }
             }

@@ -122,21 +122,6 @@ public class ChessGame {
         chessBoard.addPiece(move.getEndPosition(), piece);
     }
 
-//    /**
-//     * Attempts a move to see if it is valid, this must be called before calling makeMove outside valid moves method
-//     * @param move chess move to preform
-//     * @throws InvalidMoveException if move is invalid
-//     */
-//    public void attemptMove(ChessMove move) throws InvalidMoveException {
-//        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
-//
-//        if (!validMoves.contains(move)) {
-//            throw new InvalidMoveException();
-//        }
-//
-//        makeMove(move);
-//    }
-
     /**
      * Determines if the given team is in check
      *
