@@ -17,6 +17,7 @@ public class ChessGame {
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         chessBoard = new ChessBoard();
+        chessBoard.resetBoard();
     }
 
     /**
@@ -65,9 +66,7 @@ public class ChessGame {
                 for (int j = 0; j < chessBoard.chessBoard[i].length; j++) {
                     ChessPosition position = new ChessPosition(i + 1, j + 1);
                     ChessPiece newPiece = chessBoard.getPiece(position);
-                    if (newPiece != null) {
-                        tempGame.chessBoard.addPiece(position, newPiece);
-                    }
+                    tempGame.chessBoard.addPiece(position, newPiece);
                 }
             }
 
@@ -181,28 +180,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheck(teamColor)) {
-            return false;
-        }
-
-        TeamColor enemy = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-        ChessPosition kingPosition = chessBoard.getKing(teamColor);
-        ChessPiece kingPiece = chessBoard.getPiece(kingPosition);
-        Collection<ChessMove> kingMoves = kingPiece.pieceMoves(chessBoard, kingPosition);
-        Collection<ChessMove> enemyMoves = allValidMoves(enemy);
-        for (ChessMove kingMove: kingMoves) {
-            boolean canMove = true;
-            for (ChessMove enemyMove: enemyMoves) {
-                if (kingMove.getEndPosition() == enemyMove.getEndPosition()) {
-                    canMove = false;
-                    break;
-                }
-            }
-            if (canMove) {
-                return true;
-            }
-        }
-        return false;
+        return allValidMoves(teamColor).isEmpty();
     }
 
     /**
