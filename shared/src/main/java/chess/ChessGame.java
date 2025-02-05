@@ -136,15 +136,53 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException{
         ChessPiece piece = chessBoard.getPiece(move.getStartPosition());
-        if (getTeamTurn() != piece.getTeamColor()) {
+
+        // If it is not the teams turns, throw exception
+        if (chessBoard.getPiece(move.getStartPosition()) == null || getTeamTurn() != piece.getTeamColor()) {
             throw new InvalidMoveException();
         }
+
+        ChessPiece endPiece = chessBoard.getPiece(move.getEndPosition());
+        if (endPiece != null && getTeamTurn() == endPiece.getTeamColor()) {
+            throw new InvalidMoveException();
+        }
+
+        // Create a copy of the board
+        ChessGame tempGame = new ChessGame();
+        tempGame.setTeamTurn(getTeamTurn());
+        for (int i = 0; i < chessBoard.chessBoard.length; i++) {
+            for (int j = 0; j < chessBoard.chessBoard[i].length; j++) {
+                ChessPosition position = new ChessPosition(i + 1, j + 1);
+                ChessPiece newPiece = chessBoard.getPiece(position);
+                tempGame.chessBoard.addPiece(position, newPiece);
+            }
+        }
+
+        // Apply the move on the temp board
+        try {
+            tempGame.makeTempMove(move);
+        } catch (InvalidMoveException e){
+            throw new InvalidMoveException();
+        }
+
+        // Check if the king is still safe
+        if (tempGame.isInCheck(piece.getTeamColor())) {
+            throw new InvalidMoveException();
+        }
+
+        Collection<ChessMove> pieceMoves = validMoves(move.getStartPosition());
+
+        if (!pieceMoves.contains(move)) {
+            throw new InvalidMoveException();
+        }
+
         chessBoard.addPiece(move.getStartPosition(), null);
         ChessPiece.PieceType promotionType = move.getPromotionPiece();
         if (promotionType != null) {
             piece.type = promotionType;
         }
         chessBoard.addPiece(move.getEndPosition(), piece);
+        setTeamTurn((getTeamTurn() == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
     /**
