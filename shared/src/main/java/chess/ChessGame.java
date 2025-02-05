@@ -140,6 +140,10 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
         chessBoard.addPiece(move.getStartPosition(), null);
+        ChessPiece.PieceType promotionType = move.getPromotionPiece();
+        if (promotionType != null) {
+            piece.type = promotionType;
+        }
         chessBoard.addPiece(move.getEndPosition(), piece);
     }
 
