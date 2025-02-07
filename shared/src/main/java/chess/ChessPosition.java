@@ -49,7 +49,7 @@ public class ChessPosition {
         return col;
     }
 
-    public boolean InBounds() {
+    public boolean inBounds() {
         return (row >= 1 &&
                 row < 9 &&
                 col >= 1 &&

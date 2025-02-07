@@ -30,19 +30,19 @@ class PawnMovesCalculator implements PieceMovesCalculator {
         ChessPosition rightDiag = new ChessPosition(row + direction, column + direction);
         ChessPosition leftDiag = new ChessPosition(row + direction, column - direction);
 
-        if (forward.InBounds()) {
+        if (forward.inBounds()) {
             if (board.getPiece(forward) == null) {
                 getPawnPromotions(position, chessMoves, forward);
-                if ((row == 2 || row == 7) && twoForward.InBounds() && board.getPiece(twoForward) == null) {
+                if ((row == 2 || row == 7) && twoForward.inBounds() && board.getPiece(twoForward) == null) {
                     // Two Forward
                     chessMoves.add(new ChessMove(position, twoForward, null));
                 }
             }
         }
-        if (leftDiag.InBounds() && board.getPiece(leftDiag) != null && board.getPiece(leftDiag).pieceColor == enemy) {
+        if (leftDiag.inBounds() && board.getPiece(leftDiag) != null && board.getPiece(leftDiag).pieceColor == enemy) {
             getPawnPromotions(position, chessMoves, leftDiag);
         }
-        if (rightDiag.InBounds() && board.getPiece(rightDiag) != null && board.getPiece(rightDiag).pieceColor == enemy) {
+        if (rightDiag.inBounds() && board.getPiece(rightDiag) != null && board.getPiece(rightDiag).pieceColor == enemy) {
             getPawnPromotions(position, chessMoves, rightDiag);
         }
         return chessMoves;

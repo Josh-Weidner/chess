@@ -25,7 +25,7 @@ public class ChessMoveUtils {
                 currentCol += direction[1];
                 ChessPosition nextPosition = new ChessPosition(currentRow, currentCol);
 
-                if (!nextPosition.InBounds()) {
+                if (!nextPosition.inBounds()) {
                     break; // Out of bounds
                 }
 
@@ -59,7 +59,7 @@ public class ChessMoveUtils {
             int newCol = position.getColumn() + move[1];
             ChessPosition nextPosition = new ChessPosition(newRow, newCol);
 
-            if (nextPosition.InBounds()) {
+            if (nextPosition.inBounds()) {
                 ChessPiece targetPiece = board.getPiece(nextPosition);
 
                 if (targetPiece == null) {
