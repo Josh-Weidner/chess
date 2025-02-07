@@ -70,7 +70,7 @@ public class ChessGame {
      * @return return if the move is valid and will keep the king protected
      */
     public boolean isValidMove(ChessMove move) {
-        ChessPiece piece = chessBoard.getPiece(move.startPosition());
+        ChessPiece piece = chessBoard.getPiece(move.getStartPosition());
 
         // Create a copy of the board
         ChessGame tempGame = new ChessGame();
@@ -94,9 +94,9 @@ public class ChessGame {
      * @param move temp chess move to preform
      */
     public void makeTempMove(ChessMove move) {
-        ChessPiece piece = chessBoard.getPiece(move.startPosition());
-        chessBoard.addPiece(move.startPosition(), null);
-        chessBoard.addPiece(move.endPosition(), piece);
+        ChessPiece piece = chessBoard.getPiece(move.getStartPosition());
+        chessBoard.addPiece(move.getStartPosition(), null);
+        chessBoard.addPiece(move.getEndPosition(), piece);
     }
 
     /**
@@ -106,7 +106,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException{
-        ChessPiece piece = chessBoard.getPiece(move.startPosition());
+        ChessPiece piece = chessBoard.getPiece(move.getStartPosition());
 
         // If piece is null, throw exception
         if (piece == null) { throw new InvalidMoveException("No piece was found at move's startPosition"); }
@@ -115,17 +115,17 @@ public class ChessGame {
         if (getTeamTurn() != piece.getTeamColor()) { throw new InvalidMoveException("It is not your turn"); }
 
         // Check if the move is included in the valid moves, if not throw exception
-        Collection<ChessMove> validMoves = validMoves(move.startPosition());
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
         if (!validMoves.contains(move)) { throw new InvalidMoveException("Move is not valid, and might leave your king vulnerable"); }
 
         // Handle piece promotion if necessary
-        ChessPiece.PieceType promotionType = move.promotionPiece();
+        ChessPiece.PieceType promotionType = move.getPromotionPiece();
         if (promotionType != null) {
             piece.type = promotionType;
         }
 
-        chessBoard.addPiece(move.startPosition(), null);
-        chessBoard.addPiece(move.endPosition(), piece);
+        chessBoard.addPiece(move.getStartPosition(), null);
+        chessBoard.addPiece(move.getEndPosition(), piece);
         setTeamTurn((getTeamTurn() == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
@@ -142,7 +142,7 @@ public class ChessGame {
 
         // if any possible move by the enemy team lands on the King, the team is in check
         for (ChessMove enemyMove: enemyMoves) {
-            if (enemyMove.endPosition().equals(kingPosition)) { return true; }
+            if (enemyMove.getEndPosition().equals(kingPosition)) { return true; }
         }
 
         return false;
