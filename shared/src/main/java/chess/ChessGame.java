@@ -89,7 +89,7 @@ public class ChessGame {
     }
 
     /**
-     * Makes a move in a temp chess game not important of whose turn it is
+     * Makes a move in a temp chess game, not important of whose turn it is
      *
      * @param move temp chess move to preform
      */
