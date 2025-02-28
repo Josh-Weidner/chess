@@ -2,6 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import service.FailureResult;
+import service.Login.LoginRequest;
+import service.Login.LoginResult;
 import service.Register.RegisterRequest;
 import service.Register.RegisterResult;
 import service.UserService;
@@ -54,8 +56,37 @@ public class UserHandler {
             // clear database
             AuthService.clear();
 
+            // success
             res.status(200);
             return serializer.toJson("");
+        }
+        catch (Exception e) {
+            res.status(500);
+            FailureResult failureResult = new FailureResult("Error: " + e.getMessage());
+            return serializer.toJson(failureResult);
+        }
+    }
+
+    public static String loginUser(Request req, Response res) {
+        res.type("application/json");
+
+        try {
+            // get body of request
+            LoginRequest loginRequest = serializer.fromJson(req.body(), LoginRequest.class);
+
+            // login
+            LoginResult loginResult = UserService.login(loginRequest);
+
+            // if result is null, or any fields are null it was unauthorized
+            if (loginResult == null || loginResult.username() == null || loginResult.authToken() == null) {
+                res.status(401);
+                FailureResult failureResult = new FailureResult("Error: unauthorized");
+                return serializer.toJson(failureResult);
+            }
+
+            // success
+            res.status(200);
+            return serializer.toJson(loginResult);
         }
         catch (Exception e) {
             res.status(500);

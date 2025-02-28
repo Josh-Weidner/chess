@@ -29,6 +29,17 @@ public class UserService {
         return new RegisterResult(newUser.username(), authData.authToken());
     }
 
-//    public LoginResult login(LoginRequest loginRequest) {}
+    public static LoginResult login(LoginRequest loginRequest) {
+
+        // get user from database
+        UserData userData = UserDAO.getUser(loginRequest.username());
+        if (userData == null) { return null; }
+
+        // create authData
+        AuthData authData = AuthService.generateAuthData(userData.username());
+        AuthDAO.createAuth(authData);
+
+        return new LoginResult(userData.username(), authData.authToken());
+    }
 //    public LogoutResult logout(LogoutRequest logoutRequest) {}
 }
