@@ -1,14 +1,13 @@
 package service;
 
-import dataaccess.GameDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import server.ResponseException;
 import service.Login.LoginRequest;
 import service.Login.LoginResult;
 import service.Register.RegisterRequest;
 import service.Register.RegisterResult;
-import dataaccess.AuthDAO;
-import dataaccess.UserDAO;
 
 import java.util.Objects;
 
@@ -17,43 +16,43 @@ public class UserService {
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
 
-    private final AuthService authService;
-
-    public UserService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO, AuthService authService) {
+    public UserService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
-
-        this.authService = authService;
     }
 
-    public RegisterResult register(RegisterRequest registerRequest) throws Exception {
-        try {
-            // if name is not found, a data error will be thrown, and we will catch that and handle user creation
-            userDAO.getUser(registerRequest.getUsername());
+    public RegisterResult register(RegisterRequest registerRequest) throws ResponseException {
+        // bad request
+        if (registerRequest.getUsername() == null || registerRequest.getPassword() == null || registerRequest.getEmail() == null) {
+            throw new ResponseException(400, "Error: bad request");
         }
-        catch (Exception e) {
-            // create user object and add to database
-            UserData newUser = new UserData(registerRequest.getUsername(), registerRequest.getPassword(), registerRequest.getEmail());
-            userDAO.addUser(newUser);
 
-            // create auth object and add to database
-            AuthData authData = AuthService.generateAuthData(newUser.username());
-            authDAO.createAuth(authData);
-
-            return new RegisterResult(newUser.username(), authData.authToken());
+        // already taken
+        UserData userData = userDAO.getUser(registerRequest.getUsername());
+        if (userData != null) {
+            throw new ResponseException(403, "Error: already taken");
         }
-        // if we got here it means that a user already has that username
-        throw new Exception("already taken");
+
+        // create user object and add to database
+        UserData newUser = new UserData(registerRequest.getUsername(), registerRequest.getPassword(), registerRequest.getEmail());
+        userDAO.addUser(newUser);
+
+        // create auth object and add to database
+        AuthData authData = AuthService.generateAuthData(newUser.username());
+        authDAO.createAuth(authData);
+
+        return new RegisterResult(newUser.username(), authData.authToken());
     }
 
-    public LoginResult login(LoginRequest loginRequest) throws Exception {
-
+    public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         // get user from database
         UserData userData = userDAO.getUser(loginRequest.username());
 
         // verify password
-        if (!Objects.equals(userData.password(), loginRequest.password())) { throw new Exception("unauthorized"); }
+        if (userData == null || !Objects.equals(userData.password(), loginRequest.password())) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
 
         // create auth object and add to database
         AuthData authData = AuthService.generateAuthData(userData.username());
@@ -62,10 +61,7 @@ public class UserService {
         return new LoginResult(userData.username(), authData.authToken());
     }
 
-    public void clear(String authToken) throws Exception {
-        // if auth is not found an exception will be thrown and no clearing will be done
-        authService.getAuthData(authToken);
-
+    public void clear() {
         authDAO.clear();
         userDAO.clear();
         gameDAO.clear();

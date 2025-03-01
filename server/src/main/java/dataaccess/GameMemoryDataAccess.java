@@ -25,17 +25,11 @@ public class GameMemoryDataAccess implements GameDAO{
         return id;
     }
 
-    public GameData getGame(Integer gameId) throws DataAccessException {
-        if (!games.containsKey(gameId)) {
-            throw new DataAccessException("Game with id " + gameId + " not found");
-        }
+    public GameData getGame(Integer gameId){
         return games.get(gameId);
     }
 
-    public void updateGame(Integer gameId, ChessGame.TeamColor teamColor, String userName) throws DataAccessException {
-        if (!games.containsKey(gameId)) {
-            throw new DataAccessException("Game with id " + gameId + " does not exist");
-        }
+    public void updateGame(Integer gameId, ChessGame.TeamColor teamColor, String userName){
 
         GameData gameData = games.get(gameId); // Get the existing object
 

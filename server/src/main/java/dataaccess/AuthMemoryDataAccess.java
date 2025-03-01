@@ -11,17 +11,11 @@ public class AuthMemoryDataAccess implements AuthDAO {
         auths.clear();
     }
 
-    public AuthData getAuth(String authToken) throws DataAccessException {
-        if (!auths.containsKey(authToken)) {
-            throw new DataAccessException("unauthorized");
-        }
+    public AuthData getAuth(String authToken) {
         return auths.get(authToken);
     }
 
-    public void deleteAuth(String authToken) throws DataAccessException {
-        if (!auths.containsKey(authToken)) {
-            throw new DataAccessException("Auth token not found");
-        }
+    public void deleteAuth(String authToken) {
         auths.remove(authToken);
     }
 

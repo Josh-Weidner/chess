@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
+import server.ResponseException;
 import service.Create.CreateRequest;
 import service.Create.CreateResult;
 import service.Join.JoinRequest;
@@ -23,14 +24,8 @@ public class GameService {
         this.authService = authService;
     }
 
-    public ListResult gameList(String authToken) throws Exception {
-        try {
-            // if auth is not found in database error will be thrown
-            authService.getAuthData(authToken);
-        }
-        catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
+    public ListResult gameList(String authToken) throws ResponseException {
+        authService.getAuthData(authToken);
 
         // initialize our new list and the list from the database
         ArrayList<GameDataModel> gameDataModelList = new ArrayList<>();
@@ -44,34 +39,30 @@ public class GameService {
         return new ListResult(gameDataModelList);
     }
 
-    public void joinGame(String authToken, JoinRequest joinRequest) throws Exception {
-        try {
-            // if auth is not found in database error will be thrown
-            AuthData authData = authService.getAuthData(authToken);
-
-            // if game is not found in database error will be thrown
-            GameData gameData = gameDAO.getGame(joinRequest.gameID());
-
-            // check if the corresponding team is occupied
-            if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null) || (joinRequest.playerColor() == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null)) {
-                throw new Exception("already taken");
-            }
-
-            gameDAO.updateGame(gameData.gameID(), joinRequest.playerColor(), authData.username());
+    public void joinGame(String authToken, JoinRequest joinRequest) throws ResponseException {
+        if (authToken == null || joinRequest == null || joinRequest.gameID() == null || joinRequest.playerColor() == null) {
+            throw new ResponseException(400, "Error: bad request");
         }
-        catch (Exception e) {
-            throw new Exception(e.getMessage());
+
+        AuthData authData = authService.getAuthData(authToken);
+
+        // if game is not found in database error will be thrown
+        GameData gameData = gameDAO.getGame(joinRequest.gameID());
+
+        // check if the corresponding team is occupied
+        if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null) || (joinRequest.playerColor() == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null)) {
+            throw new ResponseException(403, "Error: already taken");
         }
+
+        gameDAO.updateGame(gameData.gameID(), joinRequest.playerColor(), authData.username());
     }
 
-    public CreateResult createGame(String authToken, CreateRequest createRequest) throws Exception {
-        try {
-            // if auth is not found in database error will be thrown
-            authService.getAuthData(authToken);
+    public CreateResult createGame(String authToken, CreateRequest createRequest) throws ResponseException {
+        if (authToken == null || createRequest == null || createRequest.gameName() == null) {
+            throw new ResponseException(400, "Error: bad request");
         }
-        catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
+
+        authService.getAuthData(authToken);
 
         Integer gameId = gameDAO.createGame(createRequest.gameName());
 

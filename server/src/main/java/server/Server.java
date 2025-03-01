@@ -1,28 +1,28 @@
 package server;
 
+import dataaccess.*;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
 import spark.*;
 
 public class Server {
-    private final UserService userService;
-    private final GameService gameService;
-    private final AuthService authService;
-
-    public Server(UserService userService, GameService gameService, AuthService authService) {
-        this.userService = userService;
-        this.gameService = gameService;
-        this.authService = authService;
-    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
 
+        UserDAO userDAO = new UserMemoryDataAccess();
+        GameDAO gameDAO = new GameMemoryDataAccess();
+        AuthDAO authDAO = new AuthMemoryDataAccess();
+
+        UserService userService = new UserService (userDAO, authDAO, gameDAO);
+        AuthService authService = new AuthService(authDAO);
+        GameService gameService = new GameService(gameDAO, authService);
+
         // Register your endpoints and handle exceptions here.
-        UserHandler userHandler = new UserHandler(userService, authService);
+        UserHandler  userHandler = new UserHandler(userService, authService);
         Spark.post("/user", userHandler::registerUser);
         Spark.delete("/db", userHandler::clearDatabase);
         Spark.post("/session", userHandler::loginUser);
@@ -32,6 +32,8 @@ public class Server {
         Spark.get("/game", gameHandler::listGames);
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
+
+        Spark.exception(ResponseException.class, this::exceptionHandler);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
@@ -43,5 +45,10 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private void exceptionHandler(ResponseException ex, Request req, Response res) {
+        res.status(ex.StatusCode());
+        res.body(ex.toJson());
     }
 }
