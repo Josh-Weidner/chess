@@ -26,7 +26,7 @@ public class UserHandler {
         try {
             res.type("application/json");
 
-            // get request from json
+            // translate
             RegisterRequest registerRequest = serializer.fromJson(req.body(), RegisterRequest.class);
 
             // check for bad request
@@ -56,9 +56,10 @@ public class UserHandler {
     }
 
     public String clearDatabase(Request req, Response res) {
-        res.type("application/json");
-
         try {
+            res.type("application/json");
+
+            // translate
             String authToken = req.headers("Authorization");
 
             // clear database
@@ -76,39 +77,39 @@ public class UserHandler {
     }
 
     public String loginUser(Request req, Response res) {
-        res.type("application/json");
-
         try {
-            // get body of request
+            res.type("application/json");
+
+            // translate
             LoginRequest loginRequest = serializer.fromJson(req.body(), LoginRequest.class);
 
             // login
             LoginResult loginResult = userService.login(loginRequest);
-
-            // if result is null, or any fields are null it was unauthorized
-            if (loginResult == null || loginResult.username() == null || loginResult.authToken() == null) {
-                res.status(401);
-                FailureResult failureResult = new FailureResult("Error: unauthorized");
-                return serializer.toJson(failureResult);
-            }
 
             // success
             res.status(200);
             return serializer.toJson(loginResult);
         }
         catch (Exception e) {
-            res.status(500);
+            if (e.getMessage().equals("unauthorized")) {
+                res.status(403);
+            }
+            else {
+                res.status(500);
+            }
             FailureResult failureResult = new FailureResult("Error: " + e.getMessage());
             return serializer.toJson(failureResult);
         }
     }
 
     public String logoutUser(Request req, Response res) {
-        res.type("application/json");
-
         try {
+            res.type("application/json");
+
+            // translate
             String authToken = req.headers("Authorization");
 
+            // logout
             authService.deleteAuthData(authToken);
 
             res.status(200);
@@ -121,7 +122,8 @@ public class UserHandler {
             else {
                 res.status(500);
             }
-            return serializer.toJson(new FailureResult("Error: " + e.getMessage()));
+            FailureResult failureResult = new FailureResult("Error: " + e.getMessage());
+            return serializer.toJson(failureResult);
         }
     }
 }

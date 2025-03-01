@@ -22,8 +22,12 @@ public class GameHandler {
 
     public String listGames(Request req, Response res) {
         try {
+            res.type("application/json");
+
+            // translate
             String authToken = req.headers("Authorization");
 
+            // list games
             ListResult listResult = gameService.gameList(authToken);
 
             res.status(200);
@@ -42,15 +46,20 @@ public class GameHandler {
     }
 
     public String createGame(Request req, Response res) {
+        res.type("application/json");
         try {
             String authToken = req.headers("Authorization");
+
+            // translate
             CreateRequest createRequest = serializer.fromJson(req.body(), CreateRequest.class);
 
+            // check for bad request
             if (createRequest == null || createRequest.gameName() == null || createRequest.gameName().isEmpty()) {
                 res.status(400);
                 return serializer.toJson(new FailureResult("Error: bad request"));
             }
 
+            // create game
             CreateResult createResult = gameService.createGame(authToken, createRequest);
 
             res.status(200);
@@ -69,15 +78,20 @@ public class GameHandler {
     }
 
     public String joinGame(Request req, Response res) {
+        res.type("application/json");
         try {
             String authToken = req.headers("Authorization");
+
+            // translate
             JoinRequest joinRequest = serializer.fromJson(req.body(), JoinRequest.class);
 
+            // check bad request
             if (joinRequest == null || joinRequest.playerColor() == null || joinRequest.gameID() == null) {
                 res.status(400);
                 return serializer.toJson(new FailureResult("Error: bad request"));
             }
 
+            // join game
             gameService.joinGame(authToken, joinRequest);
 
             res.status(200);

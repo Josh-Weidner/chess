@@ -16,7 +16,7 @@ public class Main {
 
         AuthService authService = new AuthService(authDAO);
         UserService userService = new UserService(userDAO, authDAO, gameDAO, authService);
-        GameService gameService = new GameService(authService, gameDAO);
+        GameService gameService = new GameService(gameDAO, authService);
 
         Server server = new Server(userService, gameService, authService);
         server.run(8080);
