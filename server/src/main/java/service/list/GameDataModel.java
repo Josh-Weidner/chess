@@ -1,4 +1,4 @@
-package service.List;
+package service.list;
 
 public record GameDataModel(Integer gameID, String whiteUsername, String blackUsername, String gameName) {
 }

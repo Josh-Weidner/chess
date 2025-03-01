@@ -4,10 +4,10 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import server.ResponseException;
-import service.Login.LoginRequest;
-import service.Login.LoginResult;
-import service.Register.RegisterRequest;
-import service.Register.RegisterResult;
+import service.login.LoginRequest;
+import service.login.LoginResult;
+import service.register.RegisterRequest;
+import service.register.RegisterResult;
 
 import java.util.Objects;
 

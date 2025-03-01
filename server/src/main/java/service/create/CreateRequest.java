@@ -1,4 +1,4 @@
-package service.Create;
+package service.create;
 
 public record CreateRequest(String gameName) {
 }

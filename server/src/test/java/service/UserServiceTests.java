@@ -4,14 +4,14 @@ import chess.ChessGame;
 import dataaccess.*;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
-import service.Create.CreateRequest;
-import service.Create.CreateResult;
-import service.Join.JoinRequest;
-import service.List.ListResult;
-import service.Login.LoginRequest;
-import service.Login.LoginResult;
-import service.Register.RegisterRequest;
-import service.Register.RegisterResult;
+import service.create.CreateRequest;
+import service.create.CreateResult;
+import service.join.JoinRequest;
+import service.list.ListResult;
+import service.login.LoginRequest;
+import service.login.LoginResult;
+import service.register.RegisterRequest;
+import service.register.RegisterResult;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,9 +41,10 @@ public class UserServiceTests {
     @Test
     @Order(2)
     void invalidRegister() {
-        ResponseException exception = assertThrows(ResponseException.class, () -> userService.register(new RegisterRequest("newUser", "newPassword", "newEmail@gmail.com")));
+        ResponseException exception = assertThrows(ResponseException.class,
+                () -> userService.register(new RegisterRequest("newUser", "newPassword", "newEmail@gmail.com")));
 
-        assertEquals(403, exception.StatusCode()); // Check the status code if ResponseException has one
+        assertEquals(403, exception.statusCode()); // Check the status code if ResponseException has one
         assertEquals("Error: already taken", exception.getMessage()); // Check the error message
     }
 
@@ -51,7 +52,7 @@ public class UserServiceTests {
     @Order(3)
     void invalidLogout() {
         ResponseException exception = assertThrows(ResponseException.class, () -> authService.deleteAuthData(""));
-        assertEquals(401, exception.StatusCode());
+        assertEquals(401, exception.statusCode());
         assertEquals("Error: unauthorized", exception.getMessage());
     }
 
@@ -65,7 +66,7 @@ public class UserServiceTests {
     @Order(5)
     void invalidLogin() {
         ResponseException exception = assertThrows(ResponseException.class, () -> userService.login(new LoginRequest("newUser", "wrongPassword")));
-        assertEquals(401, exception.StatusCode());
+        assertEquals(401, exception.statusCode());
         assertEquals("Error: unauthorized", exception.getMessage());
     }
 
@@ -89,8 +90,9 @@ public class UserServiceTests {
     @Test
     @Order(8)
     void invalidCreate() {
-        ResponseException responseException = assertThrows(ResponseException.class, () -> gameService.createGame("",new CreateRequest("anotherGame")));
-        assertEquals(401, responseException.StatusCode());
+        ResponseException responseException = assertThrows(ResponseException.class,
+                () -> gameService.createGame("",new CreateRequest("anotherGame")));
+        assertEquals(401, responseException.statusCode());
         assertEquals("Error: unauthorized", responseException.getMessage());
     }
 
@@ -103,8 +105,9 @@ public class UserServiceTests {
     @Test
     @Order(10)
     void invalidJoin() {
-        ResponseException responseException = assertThrows(ResponseException.class, () -> gameService.joinGame(newAuth,new JoinRequest(ChessGame.TeamColor.WHITE, newGameId)));
-        assertEquals(403, responseException.StatusCode());
+        ResponseException responseException = assertThrows(ResponseException.class,
+                () -> gameService.joinGame(newAuth,new JoinRequest(ChessGame.TeamColor.WHITE, newGameId)));
+        assertEquals(403, responseException.statusCode());
         assertEquals("Error: already taken", responseException.getMessage());
     }
 
@@ -121,7 +124,7 @@ public class UserServiceTests {
     @Order(12)
     void invalidListGames() {
         ResponseException responseException = assertThrows(ResponseException.class, () -> gameService.gameList(""));
-        assertEquals(401, responseException.StatusCode());
+        assertEquals(401, responseException.statusCode());
         assertEquals("Error: unauthorized", responseException.getMessage());
     }
 
@@ -129,8 +132,9 @@ public class UserServiceTests {
     @Order(13)
     void validClear() {
         userService.clear();
-        ResponseException responseException = assertThrows(ResponseException.class, () -> userService.login(new LoginRequest("newUser", "newPassword")));
-        assertEquals(401, responseException.StatusCode());
+        ResponseException responseException = assertThrows(ResponseException.class,
+                () -> userService.login(new LoginRequest("newUser", "newPassword")));
+        assertEquals(401, responseException.statusCode());
         assertEquals("Error: unauthorized", responseException.getMessage());
     }
 }

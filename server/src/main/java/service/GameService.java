@@ -5,11 +5,11 @@ import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 import server.ResponseException;
-import service.Create.CreateRequest;
-import service.Create.CreateResult;
-import service.Join.JoinRequest;
-import service.List.GameDataModel;
-import service.List.ListResult;
+import service.create.CreateRequest;
+import service.create.CreateResult;
+import service.join.JoinRequest;
+import service.list.GameDataModel;
+import service.list.ListResult;
 
 import java.util.ArrayList;
 
@@ -50,7 +50,8 @@ public class GameService {
         GameData gameData = gameDAO.getGame(joinRequest.gameID());
 
         // check if the corresponding team is occupied
-        if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null) || (joinRequest.playerColor() == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null)) {
+        if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null) ||
+                (joinRequest.playerColor() == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null)) {
             throw new ResponseException(403, "Error: already taken");
         }
 
