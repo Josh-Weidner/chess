@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.GameDAO;
 import model.AuthData;
 import model.UserData;
 import service.Login.LoginRequest;
@@ -9,11 +10,20 @@ import service.Register.RegisterResult;
 import dataaccess.AuthDAO;
 import dataaccess.UserDAO;
 
-public class UserService {
+import java.util.Objects;
 
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
-    private AuthService authService;
+public class UserService {
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final AuthService authService;
+
+    public UserService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO, AuthService authService) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+        this.authService = authService;
+    }
 
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {
 
@@ -38,13 +48,23 @@ public class UserService {
 
         // get user from database
         UserData userData = userDAO.getUser(loginRequest.username());
-        if (userData == null) { return null; }
+        if (userData == null || !Objects.equals(userData.password(), loginRequest.username())) { throw new Exception("unauthorized"); }
 
         // create authData
         AuthData authData = AuthService.generateAuthData(userData.username());
-        AuthDAO.createAuth(authData);
+        authDAO.createAuth(authData);
 
         return new LoginResult(userData.username(), authData.authToken());
     }
-//    public LogoutResult logout(LogoutRequest logoutRequest) {}
+
+    public void clear(String authToken) throws Exception {
+        AuthData authData = authService.getAuthData(authToken);
+        if (authData == null) {
+            throw new Exception("unauthorized");
+        }
+
+        authDAO.clear();
+        userDAO.clear();
+        gameDAO.clear();
+    }
 }

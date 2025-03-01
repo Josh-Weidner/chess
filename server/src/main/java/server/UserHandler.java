@@ -1,19 +1,25 @@
 package server;
 
 import com.google.gson.Gson;
+import service.AuthService;
 import service.FailureResult;
 import service.Login.LoginRequest;
 import service.Login.LoginResult;
 import service.Register.RegisterRequest;
 import service.Register.RegisterResult;
 import service.UserService;
-import service.AuthService;
 import spark.Request;
 import spark.Response;
 
 public class UserHandler {
-    private UserService userService;
-    private AuthService authService;
+    private final UserService userService;
+    private final AuthService authService;
+
+    public UserHandler(UserService userService, AuthService authService) {
+        this.userService = userService;
+        this.authService = authService;
+    }
+
     private static final Gson serializer = new Gson(); // Gson instance
 
     public String registerUser(Request req, Response res) {
@@ -53,8 +59,10 @@ public class UserHandler {
         res.type("application/json");
 
         try {
+            String authToken = req.headers("Authorization");
+
             // clear database
-            authService.clear();
+            userService.clear(authToken);
 
             // success
             res.status(200);
@@ -75,7 +83,7 @@ public class UserHandler {
             LoginRequest loginRequest = serializer.fromJson(req.body(), LoginRequest.class);
 
             // login
-            LoginResult loginResult = UserService.login(loginRequest);
+            LoginResult loginResult = userService.login(loginRequest);
 
             // if result is null, or any fields are null it was unauthorized
             if (loginResult == null || loginResult.username() == null || loginResult.authToken() == null) {
@@ -95,11 +103,25 @@ public class UserHandler {
         }
     }
 
-//    public static String logoutUser(Request req, Response res) {
-//        res.type("application/json");
-//
-//        try {
-//            String authToken = req.headers("Authorization");
-//        }
-//    }
+    public String logoutUser(Request req, Response res) {
+        res.type("application/json");
+
+        try {
+            String authToken = req.headers("Authorization");
+
+            authService.deleteAuthData(authToken);
+
+            res.status(200);
+            return serializer.toJson("");
+        }
+        catch (Exception e) {
+            if (e.getMessage().equals("unauthorized")) {
+                res.status(401);
+            }
+            else {
+                res.status(500);
+            }
+            return serializer.toJson(new FailureResult("Error: " + e.getMessage()));
+        }
+    }
 }

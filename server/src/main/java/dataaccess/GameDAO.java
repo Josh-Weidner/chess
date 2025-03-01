@@ -1,10 +1,15 @@
 package dataaccess;
 
+import chess.ChessGame;
+import model.GameData;
+
+import java.util.ArrayList;
+
 public interface GameDAO {
-    void createGame();
-    void updateGame();
-    void getGame();
-    void listGames();
+    Integer createGame(String gameName);
+    void updateGame(Integer gameId, ChessGame.TeamColor teamColor, String userName);
+    GameData getGame(Integer gameId);
+    ArrayList<GameData> listGames();
     void clear();
 
 }
