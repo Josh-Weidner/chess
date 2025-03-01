@@ -3,6 +3,8 @@ package dataaccess;
 import model.AuthData;
 
 public interface AuthDAO {
-    static void clear() {}
-    static void createAuth(AuthData authData) {}
+    void clear();
+    void createAuth(AuthData authData);
+    void getAuth(AuthData authData);
+    void deleteAuth(AuthData authData);
 }

@@ -6,8 +6,15 @@ import model.AuthData;
 import java.util.UUID;
 
 public class AuthService {
-    public static void clear() {
-        AuthDAO.clear();
+
+    private dataaccess.AuthDAO authDAO;
+    private dataaccess.UserDAO userDAO;
+    private dataaccess.GameDAO gameDAO;
+
+    public void clear() throws Exception {
+        authDAO.clear();
+        userDAO.clear();
+        gameDAO.clear();
     }
 
     public static AuthData generateAuthData(String username) {

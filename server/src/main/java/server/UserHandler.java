@@ -12,9 +12,11 @@ import spark.Request;
 import spark.Response;
 
 public class UserHandler {
+    private UserService userService;
+    private AuthService authService;
     private static final Gson serializer = new Gson(); // Gson instance
 
-    public static String registerUser(Request req, Response res) {
+    public String registerUser(Request req, Response res) {
         try {
             res.type("application/json");
 
@@ -29,32 +31,30 @@ public class UserHandler {
             }
 
             // get result from service
-            RegisterResult registerResult = UserService.register(registerRequest);
-
-            // check if result is empty, meaning username is already taken
-            if (registerResult == null) {
-                res.status(403);
-                FailureResult failureResult = new FailureResult("Error: already taken");
-                return serializer.toJson(failureResult);
-            }
+            RegisterResult registerResult = userService.register(registerRequest);
 
             // Return success response
             res.status(200);
             return serializer.toJson(registerResult);
         }
         catch (Exception e) {
-            res.status(500);
+            if (e.getMessage().equals("already taken")) {
+                res.status(403);
+            }
+            else {
+                res.status(500);
+            }
             FailureResult failureResult = new FailureResult("Error: " + e.getMessage());
             return serializer.toJson(failureResult);
         }
     }
 
-    public static String clearDatabase(Request req, Response res) {
+    public String clearDatabase(Request req, Response res) {
         res.type("application/json");
 
         try {
             // clear database
-            AuthService.clear();
+            authService.clear();
 
             // success
             res.status(200);
@@ -67,7 +67,7 @@ public class UserHandler {
         }
     }
 
-    public static String loginUser(Request req, Response res) {
+    public String loginUser(Request req, Response res) {
         res.type("application/json");
 
         try {
@@ -94,4 +94,12 @@ public class UserHandler {
             return serializer.toJson(failureResult);
         }
     }
+
+//    public static String logoutUser(Request req, Response res) {
+//        res.type("application/json");
+//
+//        try {
+//            String authToken = req.headers("Authorization");
+//        }
+//    }
 }
