@@ -1,10 +1,11 @@
 package dataaccess;
 
 import model.AuthData;
+import server.ResponseException;
 
 public interface AuthDAO {
-    void clear();
-    void createAuth(AuthData authData);
-    AuthData getAuth(String authToken);
-    void deleteAuth(String authToken);
+    void clear() throws ResponseException;
+    void createAuth(AuthData authData) throws ResponseException;
+    AuthData getAuth(String authToken) throws ResponseException;
+    void deleteAuth(String authToken) throws ResponseException;
 }
