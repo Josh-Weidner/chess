@@ -1,6 +1,9 @@
 package server;
 
 import dataaccess.*;
+import dataaccess.memory.AuthMemoryDataAccess;
+import dataaccess.memory.GameMemoryDataAccess;
+import dataaccess.memory.UserMemoryDataAccess;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -16,6 +19,10 @@ public class Server {
         UserDAO userDAO = new UserMemoryDataAccess();
         GameDAO gameDAO = new GameMemoryDataAccess();
         AuthDAO authDAO = new AuthMemoryDataAccess();
+
+        if (args.length >= 2 && args[1].equals("sql")) {
+            dataAccess = new MySqlDataAccess();
+        }
 
         UserService userService = new UserService (userDAO, authDAO, gameDAO);
         AuthService authService = new AuthService(authDAO);

@@ -2,6 +2,9 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
+import dataaccess.memory.AuthMemoryDataAccess;
+import dataaccess.memory.GameMemoryDataAccess;
+import dataaccess.memory.UserMemoryDataAccess;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
 import service.create.CreateRequest;
