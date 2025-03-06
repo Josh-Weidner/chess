@@ -3,23 +3,26 @@ package dataaccess.mysql;
 import dataaccess.DatabaseManager;
 import dataaccess.UserDAO;
 import model.UserData;
+import server.ResponseException;
+import org.mindrot.jbrypt.BCrypt;
 
 import java.sql.*;
 
 public class MySqlUserDataAccess implements UserDAO {
     private final DatabaseManager databaseManager;
 
-    public MySqlUserDataAccess(DatabaseManager databaseManager) throws server.ResponseException {
+    public MySqlUserDataAccess(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
         databaseManager.configureDatabase();
     }
 
-    public void addUser(UserData user) throws server.ResponseException {
+    public void addUser(UserData user) throws ResponseException {
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        databaseManager.executeUpdate(statement, user.username(), user.password(), user.email());
+        var hashedPass = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        databaseManager.executeUpdate(statement, user.username(), hashedPass, user.email());
     }
 
-    public UserData getUser(String username) throws server.ResponseException {
+    public UserData getUser(String username) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM users WHERE username=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -31,12 +34,12 @@ public class MySqlUserDataAccess implements UserDAO {
                 }
             }
         } catch (Exception e) {
-            throw new server.ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
         }
         return null;
     }
 
-    public void clear() throws server.ResponseException {
+    public void clear() throws ResponseException {
         var statement = "DELETE FROM users";
         databaseManager.executeUpdate(statement);
     }

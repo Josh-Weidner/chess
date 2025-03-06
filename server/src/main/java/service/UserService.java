@@ -50,7 +50,7 @@ public class UserService {
         UserData userData = userDAO.getUser(loginRequest.username());
 
         // verify password
-        if (userData == null || !Objects.equals(userData.password(), loginRequest.password())) {
+        if (userData == null || !BCrypt.checkpw(loginRequest.password(), userData.password())) {
             throw new ResponseException(401, "Error: unauthorized");
         }
 

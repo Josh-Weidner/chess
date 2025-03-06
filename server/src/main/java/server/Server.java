@@ -1,9 +1,9 @@
 package server;
 
 import dataaccess.*;
-import dataaccess.memory.AuthMemoryDataAccess;
-import dataaccess.memory.GameMemoryDataAccess;
-import dataaccess.memory.UserMemoryDataAccess;
+import dataaccess.mysql.MySqlAuthDataAccess;
+import dataaccess.mysql.MySqlGameDataAccess;
+import dataaccess.mysql.MySqlUserDataAccess;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -16,20 +16,17 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        UserDAO userDAO = new UserMemoryDataAccess();
-        GameDAO gameDAO = new GameMemoryDataAccess();
-        AuthDAO authDAO = new AuthMemoryDataAccess();
-
-        if (args.length >= 2 && args[1].equals("sql")) {
-            dataAccess = new MySqlDataAccess();
-        }
+        DatabaseManager databaseManager = new DatabaseManager();
+        UserDAO userDAO = new MySqlUserDataAccess(databaseManager);
+        GameDAO gameDAO = new MySqlGameDataAccess(databaseManager);
+        AuthDAO authDAO = new MySqlAuthDataAccess(databaseManager);
 
         UserService userService = new UserService (userDAO, authDAO, gameDAO);
         AuthService authService = new AuthService(authDAO);
         GameService gameService = new GameService(gameDAO, authService);
 
         // Register your endpoints and handle exceptions here.
-        UserHandler  userHandler = new UserHandler(userService, authService);
+        UserHandler userHandler = new UserHandler(userService, authService);
         Spark.post("/user", userHandler::registerUser);
         Spark.delete("/db", userHandler::clearDatabase);
         Spark.post("/session", userHandler::loginUser);

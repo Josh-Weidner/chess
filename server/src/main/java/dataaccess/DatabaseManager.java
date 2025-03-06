@@ -2,9 +2,9 @@ package dataaccess;
 
 import java.sql.*;
 import java.util.Properties;
+import server.ResponseException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 public class DatabaseManager {
     private static final String DATABASE_NAME;
@@ -73,21 +73,21 @@ public class DatabaseManager {
         }
     }
 
-
-
-    public int executeUpdate(String statement, Object... params) throws server.ResponseException {
-        try (var conn = DatabaseManager.getConnection()) {
+    public int executeUpdate(String statement, Object... params) throws ResponseException {
+        try (var conn = getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
+
                     switch (param) {
+                        case null -> ps.setNull(i + 1, Types.NULL);
                         case String p -> ps.setString(i + 1, p);
                         case Integer p -> ps.setInt(i + 1, p);
-                        case null -> ps.setNull(i + 1, NULL);
                         default -> {
                         }
                     }
                 }
+
                 ps.executeUpdate();
 
                 var rs = ps.getGeneratedKeys();
@@ -98,21 +98,21 @@ public class DatabaseManager {
                 return 0;
             }
         } catch (Exception e) {
-            throw new server.ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+            throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
     }
 
-
-    public void configureDatabase() throws server.ResponseException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
+    public void configureDatabase() throws ResponseException {
+        try { createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                for (var statement : createStatements) {
+                    try (var preparedStatement = conn.prepareStatement(statement)) {
+                        preparedStatement.executeUpdate();
+                    }
                 }
             }
         } catch (Exception ex) {
-            throw new server.ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
 
