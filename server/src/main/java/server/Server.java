@@ -17,9 +17,16 @@ public class Server {
         Spark.staticFiles.location("web");
 
         DatabaseManager databaseManager = new DatabaseManager();
-        UserDAO userDAO = new MySqlUserDataAccess(databaseManager);
-        GameDAO gameDAO = new MySqlGameDataAccess(databaseManager);
-        AuthDAO authDAO = new MySqlAuthDataAccess(databaseManager);
+        UserDAO userDAO;
+        GameDAO gameDAO;
+        AuthDAO authDAO;
+        try {
+            userDAO = new MySqlUserDataAccess(databaseManager);
+            gameDAO = new MySqlGameDataAccess(databaseManager);
+            authDAO = new MySqlAuthDataAccess(databaseManager);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         UserService userService = new UserService (userDAO, authDAO, gameDAO);
         AuthService authService = new AuthService(authDAO);

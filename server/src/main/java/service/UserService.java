@@ -8,8 +8,7 @@ import service.login.LoginRequest;
 import service.login.LoginResult;
 import service.register.RegisterRequest;
 import service.register.RegisterResult;
-
-import java.util.Objects;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     private final UserDAO userDAO;
@@ -22,7 +21,7 @@ public class UserService {
         this.gameDAO = gameDAO;
     }
 
-    public RegisterResult register(RegisterRequest registerRequest) throws ResponseException {
+    public RegisterResult register(RegisterRequest registerRequest) throws ResponseException, DataAccessException {
         // bad request
         if (registerRequest.getUsername() == null || registerRequest.getPassword() == null || registerRequest.getEmail() == null) {
             throw new ResponseException(400, "Error: bad request");
@@ -45,7 +44,7 @@ public class UserService {
         return new RegisterResult(newUser.username(), authData.authToken());
     }
 
-    public LoginResult login(LoginRequest loginRequest) throws ResponseException {
+    public LoginResult login(LoginRequest loginRequest) throws ResponseException, DataAccessException {
         // get user from database
         UserData userData = userDAO.getUser(loginRequest.username());
 
@@ -61,7 +60,7 @@ public class UserService {
         return new LoginResult(userData.username(), authData.authToken());
     }
 
-    public void clear() {
+    public void clear()  throws DataAccessException {
         authDAO.clear();
         userDAO.clear();
         gameDAO.clear();

@@ -2,10 +2,10 @@ package dataaccess.mysql;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import dataaccess.GameDAO;
 import model.GameData;
-import server.ResponseException;
 
 import java.util.ArrayList;
 import java.sql.*;
@@ -13,18 +13,18 @@ import java.sql.*;
 public class MySqlGameDataAccess implements GameDAO {
     private final DatabaseManager databaseManager;
 
-    public MySqlGameDataAccess(DatabaseManager databaseManager) {
+    public MySqlGameDataAccess(DatabaseManager databaseManager) throws DataAccessException {
         this.databaseManager = databaseManager;
         databaseManager.configureDatabase();
     }
 
-    public Integer createGame(String gameName) throws ResponseException {
+    public Integer createGame(String gameName) throws DataAccessException {
         var statement = "INSERT INTO games (gamaName, game) VALUES (?, ?)";
         var json = new Gson().toJson(new ChessGame());
         return databaseManager.executeUpdate(statement, gameName, json);
     }
 
-    public GameData getGame(Integer gameId) throws ResponseException {
+    public GameData getGame(Integer gameId) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM games WHERE gameId=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -36,18 +36,18 @@ public class MySqlGameDataAccess implements GameDAO {
                 }
             }
         } catch (Exception e) {
-            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
         return null;
     }
 
-    public void updateGame(Integer gameId, ChessGame.TeamColor teamColor, String userName) throws ResponseException {
+    public void updateGame(Integer gameId, ChessGame.TeamColor teamColor, String userName) throws DataAccessException {
         var team = (teamColor == ChessGame.TeamColor.BLACK) ? "blackUsername" : "whiteUsername";
         var statement = "UPDATE games Set " + team + " = ? WHERE gameId = ?";
         databaseManager.executeUpdate(statement, userName, gameId);
     }
 
-    public ArrayList<GameData> listGames() throws ResponseException {
+    public ArrayList<GameData> listGames() throws DataAccessException {
         ArrayList<GameData> games = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM games";
@@ -58,12 +58,12 @@ public class MySqlGameDataAccess implements GameDAO {
                 }
             }
         } catch (Exception e) {
-            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
         return games;
     }
 
-    public void clear() throws ResponseException {
+    public void clear() throws DataAccessException {
         var statement = "DELETE FROM games";
         databaseManager.executeUpdate(statement);
     }

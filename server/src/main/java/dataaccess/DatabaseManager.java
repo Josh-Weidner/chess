@@ -2,7 +2,6 @@ package dataaccess;
 
 import java.sql.*;
 import java.util.Properties;
-import server.ResponseException;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
@@ -73,7 +72,7 @@ public class DatabaseManager {
         }
     }
 
-    public int executeUpdate(String statement, Object... params) throws ResponseException {
+    public int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {
@@ -98,11 +97,11 @@ public class DatabaseManager {
                 return 0;
             }
         } catch (Exception e) {
-            throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
     }
 
-    public void configureDatabase() throws ResponseException {
+    public void configureDatabase() throws DataAccessException {
         try { createDatabase();
             try (var conn = DatabaseManager.getConnection()) {
                 for (var statement : createStatements) {
@@ -112,7 +111,7 @@ public class DatabaseManager {
                 }
             }
         } catch (Exception ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
 

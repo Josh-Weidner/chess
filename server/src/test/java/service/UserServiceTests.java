@@ -34,7 +34,7 @@ public class UserServiceTests {
 
     @Test
     @Order(1)
-    void validRegister() throws ResponseException {
+    void validRegister() throws ResponseException, DataAccessException {
         RegisterResult result = userService.register(new RegisterRequest("newUser", "newPassword", "newEmail@gmail.com"));
         newAuth = result.authToken();
         assertEquals("newUser", result.username());
@@ -75,7 +75,7 @@ public class UserServiceTests {
 
     @Test
     @Order(6)
-    void validLogin() throws ResponseException {
+    void validLogin() throws ResponseException, DataAccessException {
         LoginResult result = userService.login(new LoginRequest("newUser", "newPassword"));
         newAuth = result.authToken();
         assertEquals("newUser", result.username());
@@ -84,7 +84,7 @@ public class UserServiceTests {
 
     @Test
     @Order(7)
-    void validCreate() throws ResponseException {
+    void validCreate() throws ResponseException, DataAccessException {
         CreateResult result = gameService.createGame(newAuth,new CreateRequest("newGame"));
         newGameId = result.gameID();
         assertNotNull(result.gameID());
@@ -133,7 +133,7 @@ public class UserServiceTests {
 
     @Test
     @Order(13)
-    void validClear() {
+    void validClear() throws DataAccessException {
         userService.clear();
         ResponseException responseException = assertThrows(ResponseException.class,
                 () -> userService.login(new LoginRequest("newUser", "newPassword")));

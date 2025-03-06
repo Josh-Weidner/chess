@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import service.AuthService;
 import service.login.LoginRequest;
 import service.login.LoginResult;
@@ -21,7 +22,7 @@ public class UserHandler {
 
     private static final Gson SERIALIZER = new Gson(); // Gson instance
 
-    public String registerUser(Request req, Response res) throws ResponseException{
+    public String registerUser(Request req, Response res) throws ResponseException, DataAccessException {
         res.type("application/json");
 
         // translate
@@ -34,7 +35,7 @@ public class UserHandler {
         return SERIALIZER.toJson(registerResult);
     }
 
-    public String clearDatabase(Request req, Response res) {
+    public String clearDatabase(Request req, Response res) throws DataAccessException {
             res.type("application/json");
 
             // clear database
@@ -45,7 +46,7 @@ public class UserHandler {
             return "";
     }
 
-    public String loginUser(Request req, Response res) throws ResponseException {
+    public String loginUser(Request req, Response res) throws ResponseException, DataAccessException {
         res.type("application/json");
 
         // translate
@@ -59,7 +60,7 @@ public class UserHandler {
         return SERIALIZER.toJson(loginResult);
     }
 
-    public String logoutUser(Request req, Response res) throws ResponseException {
+    public String logoutUser(Request req, Response res) throws ResponseException, DataAccessException {
         res.type("application/json");
 
         // translate

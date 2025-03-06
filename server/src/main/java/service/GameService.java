@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
@@ -24,7 +25,7 @@ public class GameService {
         this.authService = authService;
     }
 
-    public ListResult gameList(String authToken) throws ResponseException {
+    public ListResult gameList(String authToken) throws ResponseException, DataAccessException {
         authService.getAuthData(authToken);
 
         // initialize our new list and the list from the database
@@ -39,7 +40,7 @@ public class GameService {
         return new ListResult(gameDataModelList);
     }
 
-    public void joinGame(String authToken, JoinRequest joinRequest) throws ResponseException {
+    public void joinGame(String authToken, JoinRequest joinRequest) throws ResponseException, DataAccessException {
         if (authToken == null || joinRequest == null || joinRequest.gameID() == null || joinRequest.playerColor() == null) {
             throw new ResponseException(400, "Error: bad request");
         }
@@ -58,7 +59,7 @@ public class GameService {
         gameDAO.updateGame(gameData.gameID(), joinRequest.playerColor(), authData.username());
     }
 
-    public CreateResult createGame(String authToken, CreateRequest createRequest) throws ResponseException {
+    public CreateResult createGame(String authToken, CreateRequest createRequest) throws ResponseException, DataAccessException {
         if (authToken == null || createRequest == null || createRequest.gameName() == null) {
             throw new ResponseException(400, "Error: bad request");
         }

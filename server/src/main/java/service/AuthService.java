@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import model.AuthData;
 import server.ResponseException;
 
@@ -13,7 +14,7 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public AuthData getAuthData(String token) throws ResponseException {
+    public AuthData getAuthData(String token) throws ResponseException, DataAccessException {
         AuthData authData = authDAO.getAuth(token);
         if (authData == null) {
             throw new ResponseException(401, "Error: unauthorized");
@@ -26,7 +27,7 @@ public class AuthService {
         return new AuthData(authToken, username);
     }
 
-    public void deleteAuthData(String authToken) throws ResponseException {
+    public void deleteAuthData(String authToken) throws ResponseException, DataAccessException {
         getAuthData(authToken);
         authDAO.deleteAuth(authToken);
     }

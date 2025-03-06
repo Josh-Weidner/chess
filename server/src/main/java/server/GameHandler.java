@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import service.create.CreateRequest;
 import service.create.CreateResult;
 import service.join.JoinRequest;
@@ -18,7 +19,7 @@ public class GameHandler {
 
     private static final Gson SERIALIZER = new Gson(); // Gson instance
 
-    public String listGames(Request req, Response res) throws ResponseException {
+    public String listGames(Request req, Response res) throws ResponseException, DataAccessException {
         res.type("application/json");
 
         // translate
@@ -31,7 +32,7 @@ public class GameHandler {
         return SERIALIZER.toJson(listResult);
     }
 
-    public String createGame(Request req, Response res) throws ResponseException {
+    public String createGame(Request req, Response res) throws ResponseException, DataAccessException {
         res.type("application/json");
         String authToken = req.headers("Authorization");
 
@@ -45,7 +46,7 @@ public class GameHandler {
         return SERIALIZER.toJson(createResult);
     }
 
-    public String joinGame(Request req, Response res) throws ResponseException{
+    public String joinGame(Request req, Response res) throws ResponseException, DataAccessException {
         res.type("application/json");
         String authToken = req.headers("Authorization");
 
