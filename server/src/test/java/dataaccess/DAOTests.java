@@ -1,7 +1,6 @@
-package dao;
+package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.*;
 import dataaccess.mysql.MySqlAuthDataAccess;
 import dataaccess.mysql.MySqlGameDataAccess;
 import dataaccess.mysql.MySqlUserDataAccess;
