@@ -2,9 +2,6 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
-import dataaccess.memory.AuthMemoryDataAccess;
-import dataaccess.memory.GameMemoryDataAccess;
-import dataaccess.memory.UserMemoryDataAccess;
 import dataaccess.mysql.MySqlAuthDataAccess;
 import dataaccess.mysql.MySqlGameDataAccess;
 import dataaccess.mysql.MySqlUserDataAccess;

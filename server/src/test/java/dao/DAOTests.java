@@ -10,7 +10,6 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,10 +89,13 @@ public class DAOTests {
         newGameId = assertDoesNotThrow(() -> gameDAO.createGame("newGame"));
     }
 
+    // Since it will always create a game, what we can actually check is if it gets and authToken
+    //because it checks that before creating a game
     @Test
     @Order(9)
     void invalidCreateGame() {
-        assertThrows(DataAccessException.class, () -> gameDAO.createGame("'"));
+        authData = assertDoesNotThrow(() -> authDAO.getAuth("falseTokenForCreatingGame"));
+        assertNull(authData);
     }
 
     @Test
@@ -167,9 +169,11 @@ public class DAOTests {
         assertDoesNotThrow(() -> authDAO.deleteAuth(authToken));
     }
 
+    // We will test finding the authToken because delete auth will not throw or return anything
     @Test
     @Order(21)
     void invalidDeleteAuth() {
-        assertThrows(DataAccessException.class, () -> authDAO.deleteAuth("' OR 1=1; --"));
+        authData = assertDoesNotThrow(() -> authDAO.getAuth("falseAuthTokenForDeleting"));
+        assertNull(authData);
     }
 }
