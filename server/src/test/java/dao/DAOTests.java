@@ -158,7 +158,7 @@ public class DAOTests {
     @Test
     @Order(19)
     void invalidCreateAuth() {
-        assertThrows(SQLException.class, () -> authDAO.createAuth(new AuthData("1", "' OR 1=1; --")));
+        assertThrows(DataAccessException.class, () -> authDAO.createAuth(new AuthData("1", "' OR 1=1; --")));
     }
 
     @Test
