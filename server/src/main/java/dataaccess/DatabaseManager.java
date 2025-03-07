@@ -73,31 +73,40 @@ public class DatabaseManager {
     }
 
     public int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (var conn = getConnection()) {
-            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
+        try (var conn = getConnection();
+             var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
 
-                    switch (param) {
-                        case null -> ps.setNull(i + 1, Types.NULL);
-                        case String p -> ps.setString(i + 1, p);
-                        case Integer p -> ps.setInt(i + 1, p);
-                        default -> {
-                        }
-                    }
-                }
+            setParameters(ps, params);
 
-                ps.executeUpdate();
+            ps.executeUpdate();
+            return getGeneratedKey(ps);
 
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
-            }
         } catch (Exception e) {
             throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
+    }
+
+    private void setParameters(PreparedStatement ps, Object... params) throws SQLException {
+        for (int i = 0; i < params.length; i++) {
+            Object param = params[i];
+
+            switch (param) {
+                case null -> ps.setNull(i + 1, Types.NULL);
+                case String s -> ps.setString(i + 1, s);
+                case Integer integer -> ps.setInt(i + 1, integer);
+                default -> {
+                }
+            }
+            // Add more type checks as needed
+        }
+    }
+
+    private int getGeneratedKey(PreparedStatement ps) throws SQLException {
+        try (var rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
         }
     }
 
