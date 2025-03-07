@@ -5,6 +5,9 @@ import dataaccess.*;
 import dataaccess.memory.AuthMemoryDataAccess;
 import dataaccess.memory.GameMemoryDataAccess;
 import dataaccess.memory.UserMemoryDataAccess;
+import dataaccess.mysql.MySqlAuthDataAccess;
+import dataaccess.mysql.MySqlGameDataAccess;
+import dataaccess.mysql.MySqlUserDataAccess;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
 import service.create.CreateRequest;
@@ -22,9 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTests {
 
-    UserDAO userDAO = new UserMemoryDataAccess();
-    GameDAO gameDAO = new GameMemoryDataAccess();
-    AuthDAO authDAO = new AuthMemoryDataAccess();
+    DatabaseManager databaseManager = new DatabaseManager();
+    UserDAO userDAO = new MySqlUserDataAccess(databaseManager);
+    GameDAO gameDAO = new MySqlGameDataAccess(databaseManager);
+    AuthDAO authDAO = new MySqlAuthDataAccess(databaseManager);
     UserService userService = new UserService(userDAO, authDAO, gameDAO);
     AuthService authService = new AuthService(authDAO);
     GameService gameService = new GameService(gameDAO, authService);
@@ -32,8 +36,17 @@ public class UserServiceTests {
     private String newAuth = "";
     private Integer newGameId = 0;
 
+    public UserServiceTests() throws DataAccessException {
+    }
+
     @Test
     @Order(1)
+    void validStartClear() {
+        assertDoesNotThrow(() -> userService.clear());
+    }
+
+    @Test
+    @Order(2)
     void validRegister() throws ResponseException, DataAccessException {
         RegisterResult result = userService.register(new RegisterRequest("newUser", "newPassword", "newEmail@gmail.com"));
         newAuth = result.authToken();
@@ -42,7 +55,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void invalidRegister() {
         ResponseException exception = assertThrows(ResponseException.class,
                 () -> userService.register(new RegisterRequest("newUser", "newPassword", "newEmail@gmail.com")));
@@ -52,7 +65,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void invalidLogout() {
         ResponseException exception = assertThrows(ResponseException.class, () -> authService.deleteAuthData(""));
         assertEquals(401, exception.statusCode());
@@ -60,13 +73,13 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void validLogout() {
         assertDoesNotThrow(() -> authService.deleteAuthData(newAuth));
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void invalidLogin() {
         ResponseException exception = assertThrows(ResponseException.class, () -> userService.login(new LoginRequest("newUser", "wrongPassword")));
         assertEquals(401, exception.statusCode());
@@ -74,7 +87,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void validLogin() throws ResponseException, DataAccessException {
         LoginResult result = userService.login(new LoginRequest("newUser", "newPassword"));
         newAuth = result.authToken();
@@ -83,7 +96,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void validCreate() throws ResponseException, DataAccessException {
         CreateResult result = gameService.createGame(newAuth,new CreateRequest("newGame"));
         newGameId = result.gameID();
@@ -91,7 +104,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     void invalidCreate() {
         ResponseException responseException = assertThrows(ResponseException.class,
                 () -> gameService.createGame("",new CreateRequest("anotherGame")));
@@ -100,13 +113,13 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void validJoin() {
         assertDoesNotThrow(() -> gameService.joinGame(newAuth, new JoinRequest(ChessGame.TeamColor.WHITE, newGameId)));
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     void invalidJoin() {
         ResponseException responseException = assertThrows(ResponseException.class,
                 () -> gameService.joinGame(newAuth,new JoinRequest(ChessGame.TeamColor.WHITE, newGameId)));
@@ -115,7 +128,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     void validListGames() {
         ListResult result = assertDoesNotThrow(() -> gameService.gameList(newAuth));
 
@@ -124,7 +137,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     void invalidListGames() {
         ResponseException responseException = assertThrows(ResponseException.class, () -> gameService.gameList(""));
         assertEquals(401, responseException.statusCode());
@@ -132,7 +145,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     void validClear() throws DataAccessException {
         userService.clear();
         ResponseException responseException = assertThrows(ResponseException.class,
