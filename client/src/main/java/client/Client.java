@@ -184,6 +184,7 @@ public class Client {
 
     private String buildBoard(ChessBoard game, ChessGame.TeamColor team){
         StringBuilder board = new StringBuilder();
+        board.append(RESET_TEXT_COLOR);
 
         game.resetBoard();
         ChessPiece[][] matrix = game.chessBoard;
@@ -254,14 +255,14 @@ public class Client {
         }
     }
 
-    private String getString(ChessPiece chessPiece, String whiteKing, String whiteQueen, String whiteRook, String whiteBishop, String whiteKnight, String whitePawn) {
+    private String getString(ChessPiece chessPiece, String king, String queen, String rook, String bishop, String knight, String pawn) {
         return switch (chessPiece.getPieceType()) {
-            case KING -> whiteKing;
-            case QUEEN -> whiteQueen;
-            case ROOK -> whiteRook;
-            case BISHOP -> whiteBishop;
-            case KNIGHT -> whiteKnight;
-            case PAWN -> whitePawn;
+            case KING -> king;
+            case QUEEN -> queen;
+            case ROOK -> rook;
+            case BISHOP -> bishop;
+            case KNIGHT -> knight;
+            case PAWN -> pawn;
         };
     }
 }
