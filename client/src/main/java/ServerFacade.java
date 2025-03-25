@@ -1,13 +1,16 @@
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class ServerFacade {
-    private final String serverUrl;
+    private final URL serverUrl;
 
-    public ServerFacade(String serverUrl) {
-        this.serverUrl = serverUrl;
+    public ServerFacade(String port) throws MalformedURLException {
+        URI uri = URI.create("https://localhost:" + port + "/");
+        this.serverUrl = URL.of(uri, null);
     }
 
     private String sendRequest(String endpoint, String method, String body) throws IOException {
@@ -29,7 +32,8 @@ public class ServerFacade {
     }
 
     private HttpURLConnection getHttpURLConnection(String endpoint, String method, String body) throws IOException {
-        URL url = new URL(serverUrl + endpoint);
+        URI uri = URI.create(serverUrl + endpoint);
+        URL url = URL.of(uri, null);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod(method);
         connection.setRequestProperty("Content-Type", "application/json");
