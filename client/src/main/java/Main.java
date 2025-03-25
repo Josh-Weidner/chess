@@ -12,6 +12,7 @@ public class Main {
 
         System.out.println();
         System.out.println(BLACK_QUEEN + "Welcome to 240 Chess. Type 'ready' to get started." + BLACK_QUEEN);
+        System.out.println();
 
         System.out.print("[LOGGED_OUT] >>> ");
         String input = scanner.nextLine();
@@ -21,9 +22,14 @@ public class Main {
             System.out.println(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess");
             System.out.println(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program");
             System.out.println(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands");
+            System.out.println();
         }
 
         System.out.print("[LOGGED_OUT] >>> ");
         String input2 = scanner.nextLine();
+
+        if (input2.equalsIgnoreCase("register")) {
+
+        }
     }
 }
