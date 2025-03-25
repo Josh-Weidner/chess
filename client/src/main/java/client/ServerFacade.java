@@ -1,4 +1,4 @@
-package server;
+package client;
 
 import com.google.gson.Gson;
 import service.create.CreateRequest;
@@ -15,42 +15,42 @@ import java.net.*;
 
 public class ServerFacade {
 
-    private final int serverUrl;
+    private final String serverUrl;
 
     public ServerFacade(int Port) {
-        serverUrl = Port;
+        this.serverUrl = "http://localhost:" + Port;
     }
 
 
-    public RegisterResult registerUser(RegisterRequest registerRequest) throws server.ResponseException {
+    public RegisterResult registerUser(RegisterRequest registerRequest) throws ResponseException {
         return makeRequest("/user", "POST", registerRequest, RegisterResult.class, null);
     }
 
-    public LoginResult loginUser(LoginRequest loginRequest) throws server.ResponseException {
+    public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException {
         return makeRequest("/session", "POST", loginRequest, LoginResult.class, null);
     }
 
-    public void logoutUser(String authToken) throws server.ResponseException {
+    public void logoutUser(String authToken) throws ResponseException {
         makeRequest("/session", "DELETE", null, null, authToken);
     }
 
-    public void clearDatabase(String authToken) throws server.ResponseException {
+    public void clearDatabase(String authToken) throws ResponseException {
         makeRequest("/db", "DELETE", null, null, authToken);
     }
 
-    public ListResult listGames(String authToken) throws server.ResponseException {
+    public ListResult listGames(String authToken) throws ResponseException {
         return makeRequest("/game", "GET", null, ListResult.class, authToken);
     }
 
-    public CreateResult createGame(CreateRequest createRequest, String authToken) throws server.ResponseException {
+    public CreateResult createGame(CreateRequest createRequest, String authToken) throws ResponseException {
         return makeRequest("/game", "POST", createRequest, CreateResult.class, authToken);
     }
 
-    public void joinGame(JoinRequest joinRequest, String authToken) throws server.ResponseException {
+    public void joinGame(JoinRequest joinRequest, String authToken) throws ResponseException {
         makeRequest("/game", "PUT", joinRequest, null, authToken);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws server.ResponseException {
+    private <T> T makeRequest(String path, String method,  Object request, Class<T> responseClass, String authToken) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -65,10 +65,10 @@ public class ServerFacade {
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
-        } catch (server.ResponseException ex) {
+        } catch (ResponseException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new server.ResponseException(500, ex.getMessage());
+            throw new ResponseException(500, ex.getMessage());
         }
     }
 
@@ -83,16 +83,16 @@ public class ServerFacade {
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, server.ResponseException {
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
             try (InputStream respErr = http.getErrorStream()) {
                 if (respErr != null) {
-                    throw server.ResponseException.fromJson(respErr);
+                    throw ResponseException.fromJson(respErr);
                 }
             }
 
-            throw new server.ResponseException(status, "other failure: " + status);
+            throw new ResponseException(status, "other failure: " + status);
         }
     }
 

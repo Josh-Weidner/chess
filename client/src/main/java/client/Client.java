@@ -41,6 +41,7 @@ public class Client {
                 case "list" -> list();
                 case "observe" -> observe(params);
                 case "logout" -> logout();
+                case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -90,7 +91,10 @@ public class Client {
             int gameNumber = 1;
             for (GameDataModel game: listResult.games()) {
                 gameData.put(gameNumber, game);
-                gameList.append("(").append(gameNumber).append(") ").append(game.gameName()).append(game.whiteUsername()).append(game.blackUsername());
+                gameList.append("(").append(gameNumber).append(")  ")
+                        .append(game.gameName()).append("          ")
+                        .append(game.whiteUsername()).append("               ")
+                        .append(game.blackUsername());
             }
             return gameList.toString();
         }
@@ -182,7 +186,9 @@ public class Client {
         // First row
         board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
 
+        game.resetBoard();
         ChessPiece[][] matrix = game.chessBoard;
+
         // Flip board if black username
         if (team == ChessGame.TeamColor.BLACK) {
             matrix = flipBoard(game);
@@ -215,7 +221,7 @@ public class Client {
 
     private String getPieceString(ChessPiece chessPiece) {
         if (chessPiece == null) {
-            return "";
+            return " ";
         }
 
         String prefix = (chessPiece.getTeamColor() == ChessGame.TeamColor.WHITE) ? "WHITE_" : "BLACK_";

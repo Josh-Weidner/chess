@@ -1,5 +1,7 @@
 package client;
 
+import server.Server;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -7,16 +9,19 @@ import static ui.EscapeSequences.RESET_TEXT_COLOR;
 
 public class Repl {
     private final Client client;
+    private final int serverPort;
 
     public Repl(int serverUrl) {
+        this.serverPort = serverUrl;
         client = new Client(serverUrl);
     }
 
     public void run() {
+        Server server = new Server();
+
         System.out.println();
         System.out.println(BLACK_QUEEN + "Chess 240. Type 'help' to get started." + BLACK_QUEEN);
         System.out.println();
-        System.out.print(client.help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -36,6 +41,6 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("/n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }

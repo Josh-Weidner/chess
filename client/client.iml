@@ -8,10 +8,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="shared" />
-    <orderEntry type="module" module-name="server" scope="TEST" />
-    <orderEntry type="library" name="google.code.gson" level="project" />
-    <orderEntry type="library" name="junit.jupiter" level="project" />
-    <orderEntry type="module" module-name="server" />
+    <orderEntry type="module" module-name="shared" exported="" />
+    <orderEntry type="module" module-name="server" exported="" />
+    <orderEntry type="library" exported="" name="google.code.gson" level="project" />
+    <orderEntry type="library" exported="" name="junit.jupiter" level="project" />
+    <orderEntry type="module" module-name="server" exported="" />
   </component>
 </module>
