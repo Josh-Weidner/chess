@@ -10,6 +10,7 @@ import model.register.RegisterResult;
 import service.UserService;
 import spark.Request;
 import spark.Response;
+import exception.ResponseException;
 
 public class UserHandler {
     private final UserService userService;

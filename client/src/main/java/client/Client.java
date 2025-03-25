@@ -11,6 +11,7 @@ import model.login.LoginRequest;
 import model.login.LoginResult;
 import model.register.RegisterRequest;
 import model.register.RegisterResult;
+import exception.ResponseException;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -191,7 +192,9 @@ public class Client {
 
         if (team == ChessGame.TeamColor.BLACK) {
             // First row
-            board.append(SET_BG_COLOR_MAGENTA + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   " + RESET_BG_COLOR + "\n");
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                    + RESET_BG_COLOR + "\n");
 
             int rows = matrix.length;
             int cols = matrix[0].length;
@@ -212,11 +215,15 @@ public class Client {
             }
 
             // Last row
-            board.append(SET_BG_COLOR_MAGENTA + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   " + RESET_BG_COLOR + "\n");
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                    + RESET_BG_COLOR + "\n");
         }
         else {
             // First row
-            board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                    + RESET_BG_COLOR + "\n");
 
             int rows = matrix.length;
             int cols = matrix[0].length;
@@ -237,7 +244,9 @@ public class Client {
             }
 
             // Last row
-            board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                    + RESET_BG_COLOR + "\n");
         }
         return board.toString();
     }
@@ -248,9 +257,12 @@ public class Client {
         }
 
         if (chessPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return getString(chessPiece, SET_TEXT_COLOR_DARK_GREY + BLACK_KING + RESET_TEXT_COLOR, SET_TEXT_COLOR_DARK_GREY + BLACK_QUEEN + RESET_TEXT_COLOR,
-                    SET_TEXT_COLOR_DARK_GREY + BLACK_ROOK + RESET_TEXT_COLOR, SET_TEXT_COLOR_DARK_GREY + BLACK_BISHOP + RESET_TEXT_COLOR,
-                    SET_TEXT_COLOR_DARK_GREY + BLACK_KNIGHT + RESET_TEXT_COLOR, SET_TEXT_COLOR_DARK_GREY + BLACK_PAWN + RESET_TEXT_COLOR);
+            return getString(chessPiece, SET_TEXT_COLOR_DARK_GREY + BLACK_KING + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_QUEEN + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_ROOK + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_BISHOP + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_KNIGHT + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_PAWN + RESET_TEXT_COLOR);
         }
         else {
             return getString(chessPiece, WHITE_KING, WHITE_QUEEN, WHITE_ROOK, WHITE_BISHOP, WHITE_KNIGHT, WHITE_PAWN);

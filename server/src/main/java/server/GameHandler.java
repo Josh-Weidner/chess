@@ -9,6 +9,7 @@ import model.list.ListResult;
 import spark.Request;
 import spark.Response;
 import service.GameService;
+import exception.ResponseException;
 
 public class GameHandler {
     private final GameService gameService;
