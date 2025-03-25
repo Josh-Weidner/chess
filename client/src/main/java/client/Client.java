@@ -88,13 +88,15 @@ public class Client {
         if (listResult.games() != null) {
             StringBuilder gameList = new StringBuilder();
             gameList.append("     Game Name:    White Username:    Black Username:    \n");
-            int gameNumber = 1;
+            int gameNumber = 0;
             for (GameDataModel game: listResult.games()) {
+                gameNumber++;
                 gameData.put(gameNumber, game);
                 gameList.append("(").append(gameNumber).append(")  ")
                         .append(game.gameName()).append("          ")
                         .append(game.whiteUsername()).append("               ")
-                        .append(game.blackUsername());
+                        .append(game.blackUsername())
+                        .append("\n");
             }
             return gameList.toString();
         }
@@ -104,13 +106,13 @@ public class Client {
     }
 
     private String join(String... params) throws ResponseException {
-        if (params.length != 2) { throw new ResponseException(400, "Expected: <Name>"); }
+        if (params.length != 2) { throw new ResponseException(400, "Expected: <ID> [WHITE/BLACK]"); }
 
         int gameId = getGameId(params[0]);
 
-        if (!params[1].equals("WHITE") && !params[1].equals("BLACK")) { throw new ResponseException(400, "Invalid team color!"); }
+        if (!params[1].equals("white") && !params[1].equals("black")) { throw new ResponseException(400, "Invalid team color!"); }
 
-        ChessGame.TeamColor teamColor = ChessGame.TeamColor.valueOf(params[1]);
+        ChessGame.TeamColor teamColor = (params[1].equals("white")) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         GameDataModel game = gameData.get(gameId);
         if (game == null) {
             throw new ResponseException(400, "Game does not exist!");
@@ -123,7 +125,7 @@ public class Client {
     }
 
     private String observe(String... params) throws ResponseException {
-        if (params.length != 1) { throw new ResponseException(400, "Expected: <Name>"); }
+        if (params.length != 1) { throw new ResponseException(400, "Expected: <ID>"); }
 
         int gameId = getGameId(params[0]);
 
@@ -183,84 +185,86 @@ public class Client {
     private String buildBoard(ChessBoard game, ChessGame.TeamColor team){
         StringBuilder board = new StringBuilder();
 
-        // First row
-        board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
-
         game.resetBoard();
         ChessPiece[][] matrix = game.chessBoard;
 
-        // Flip board if black username
         if (team == ChessGame.TeamColor.BLACK) {
-            matrix = flipBoard(game);
-        }
+            // First row
+            board.append(SET_BG_COLOR_MAGENTA + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   " + RESET_BG_COLOR + "\n");
 
-        // Print board
-        int rows = matrix.length;
-        int cols = matrix[0].length;
-        int rowNum = (team == ChessGame.TeamColor.BLACK) ? 0 : 9;
-        for (int i = 0; i < rows; i++) {
-            rowNum = (team == ChessGame.TeamColor.BLACK) ? rowNum + 1 : rowNum - 1;
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-            for (int j = 0; j < cols; j++) {
-                ChessPiece chessPiece = matrix[i][j];
-                String pieceString = getPieceString(chessPiece);
-                if ((i + j) % 2 == 0) {
-                    board.append(SET_BG_COLOR_WHITE + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
-                } else {
-                    board.append(SET_BG_COLOR_BLACK + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
+            int rows = matrix.length;
+            int cols = matrix[0].length;
+            int rowNum = 1;
+            for (int i = 0; i < rows; i++) {
+                rowNum = rowNum + 1;
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+                for (int j = 0; j < cols; j++) {
+                    ChessPiece chessPiece = matrix[i][7 - j];
+                    String pieceString = getPieceString(chessPiece);
+                    if ((i + j) % 2 == 0) {
+                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                    } else {
+                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                    }
                 }
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
             }
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+
+            // Last row
+            board.append(SET_BG_COLOR_MAGENTA + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   " + RESET_BG_COLOR + "\n");
         }
+        else {
+            // First row
+            board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
 
-        // Last row
-        board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
+            int rows = matrix.length;
+            int cols = matrix[0].length;
+            int rowNum = 9;
+            for (int i = 0; i < rows; i++) {
+                rowNum = rowNum - 1;
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+                for (int j = 0; j < cols; j++) {
+                    ChessPiece chessPiece = matrix[7 - i][j];
+                    String pieceString = getPieceString(chessPiece);
+                    if ((i + j) % 2 == 0) {
+                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                    } else {
+                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                    }
+                }
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+            }
 
+            // Last row
+            board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
+        }
         return board.toString();
     }
 
     private String getPieceString(ChessPiece chessPiece) {
         if (chessPiece == null) {
-            return " ";
+            return "   ";
         }
 
-        String prefix = (chessPiece.getTeamColor() == ChessGame.TeamColor.WHITE) ? "WHITE_" : "BLACK_";
-
-        return switch (chessPiece.getPieceType()) {
-            case KING -> prefix + "KING";
-            case QUEEN -> prefix + "QUEEN";
-            case ROOK -> prefix + "ROOK";
-            case BISHOP -> prefix + "BISHOP";
-            case KNIGHT -> prefix + "KNIGHT";
-            case PAWN -> prefix + "PAWN";
-        };
-    }
-
-    private ChessPiece[][] flipBoard(ChessBoard board){
-        ChessPiece[][] matrix = new ChessPiece[8][8];
-
-        int rows = board.chessBoard.length;
-        int cols = board.chessBoard[0].length;
-
-        for (int i = 0; i < rows / 2; i++) {
-            for (int j = 0; j < cols; j++) {
-                // Swap element with it's vertically opposite counterpart
-                ChessPiece temp = board.chessBoard[i][j];
-                matrix[i][j] = board.chessBoard[rows - i - 1][cols - j - 1];
-                matrix[rows - i - 1][cols - j - 1] = temp;
-            }
+        if (chessPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            return switch (chessPiece.getPieceType()) {
+                case KING -> BLACK_KING;
+                case QUEEN -> BLACK_QUEEN;
+                case ROOK -> BLACK_ROOK;
+                case BISHOP -> BLACK_BISHOP;
+                case KNIGHT -> BLACK_KNIGHT;
+                case PAWN -> BLACK_PAWN;
+            };
         }
-
-        // If rows are odd, reverse the middle row
-        if (rows % 2 != 0) {
-            int mid = rows / 2;
-            for (int j = 0; j < cols / 2; j++) {
-                ChessPiece temp = board.chessBoard[mid][j];
-                matrix[mid][j] = board.chessBoard[mid][cols - j - 1];
-                matrix[mid][cols - j - 1] = temp;
-            }
+        else {
+            return switch (chessPiece.getPieceType()) {
+                case KING -> WHITE_KING;
+                case QUEEN -> WHITE_QUEEN;
+                case ROOK -> WHITE_ROOK;
+                case BISHOP -> WHITE_BISHOP;
+                case KNIGHT -> WHITE_KNIGHT;
+                case PAWN -> WHITE_PAWN;
+            };
         }
-
-        return matrix;
     }
 }
