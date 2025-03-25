@@ -191,7 +191,6 @@ public class Client {
         ChessPiece[][] matrix = game.chessBoard;
 
         if (team == ChessGame.TeamColor.BLACK) {
-            // First row
             board.append(SET_BG_COLOR_MAGENTA
                     + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
                     + RESET_BG_COLOR + "\n");
@@ -214,13 +213,11 @@ public class Client {
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
             }
 
-            // Last row
             board.append(SET_BG_COLOR_MAGENTA
                     + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
                     + RESET_BG_COLOR + "\n");
         }
         else {
-            // First row
             board.append(SET_BG_COLOR_MAGENTA
                     + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
                     + RESET_BG_COLOR + "\n");
@@ -243,7 +240,6 @@ public class Client {
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
             }
 
-            // Last row
             board.append(SET_BG_COLOR_MAGENTA
                     + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
                     + RESET_BG_COLOR + "\n");
