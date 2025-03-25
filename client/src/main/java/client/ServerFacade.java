@@ -1,14 +1,14 @@
 package client;
 
 import com.google.gson.Gson;
-import client.create.CreateRequest;
-import client.create.CreateResult;
-import client.join.JoinRequest;
-import client.list.ListResult;
-import client.login.LoginRequest;
-import client.login.LoginResult;
-import client.register.RegisterRequest;
-import client.register.RegisterResult;
+import service.create.CreateRequest;
+import service.create.CreateResult;
+import service.join.JoinRequest;
+import service.list.ListResult;
+import service.login.LoginRequest;
+import service.login.LoginResult;
+import service.register.RegisterRequest;
+import service.register.RegisterResult;
 
 import java.io.*;
 import java.net.*;

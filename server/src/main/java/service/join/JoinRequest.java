@@ -1,4 +1,4 @@
-package client.join;
+package service.join;
 
 import chess.ChessGame;
 
