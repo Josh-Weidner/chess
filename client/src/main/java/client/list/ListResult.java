@@ -1,4 +1,4 @@
-package service.list;
+package client.list;
 
 import java.util.List;
 
