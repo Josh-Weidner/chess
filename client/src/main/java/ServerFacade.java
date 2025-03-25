@@ -1,78 +1,119 @@
+package server;
+
+import com.google.gson.Gson;
+import exception.ErrorResponse;
+import exception.ResponseException;
+import model.Pet;
+import service.create.CreateRequest;
+import service.create.CreateResult;
+import service.join.JoinRequest;
+import service.list.ListResult;
+import service.login.LoginRequest;
+import service.login.LoginResult;
+import service.register.RegisterRequest;
+import service.register.RegisterResult;
+
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.*;
 
 public class ServerFacade {
-    private final URL serverUrl;
 
-    public ServerFacade(String port) throws MalformedURLException {
-        URI uri = URI.create("https://localhost:" + port + "/");
-        this.serverUrl = URL.of(uri, null);
+    private final String serverUrl;
+
+    public ServerFacade(String url) {
+        serverUrl = url;
     }
 
-    private String sendRequest(String endpoint, String method, String body) throws IOException {
-        HttpURLConnection connection = getHttpURLConnection(endpoint, method, body);
 
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
+    public RegisterResult registerUser(RegisterRequest registerRequest) throws server.ResponseException {
+        return makeRequest("/user", "POST", registerRequest, RegisterResult.class, null);
+    }
+
+    public LoginResult loginUser(LoginRequest loginRequest) throws server.ResponseException {
+        return makeRequest("/session", "POST", loginRequest, LoginResult.class, null);
+    }
+
+    public void logoutUser(String authToken) throws server.ResponseException {
+        makeRequest("/session", "DELETE", null, null, authToken);
+    }
+
+    public void clearDatabase(String authToken) throws server.ResponseException {
+        makeRequest("/db", "DELETE", null, null, authToken);
+    }
+
+    public ListResult listGames(String authToken) throws server.ResponseException {
+        return makeRequest("/game", "GET", null, ListResult.class, authToken);
+    }
+
+    public CreateResult createGame(CreateRequest createRequest, String authToken) throws server.ResponseException {
+        return makeRequest("/game", "POST", createRequest, CreateResult.class, authToken);
+    }
+
+    public void joinGame(JoinRequest joinRequest, String authToken) throws server.ResponseException {
+        makeRequest("/game", "PUT", joinRequest, null, authToken);
+    }
+
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws server.ResponseException {
+        try {
+            URL url = (new URI(serverUrl + path)).toURL();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod(method);
+            http.setDoOutput(true);
+
+            if (authToken != null && !authToken.isEmpty()) {
+                http.setRequestProperty("Authorization", authToken);
+            }
+
+            writeBody(request, http);
+            http.connect();
+            throwIfNotSuccessful(http);
+            return readBody(http, responseClass);
+        } catch (server.ResponseException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new server.ResponseException(500, ex.getMessage());
+        }
+    }
+
+
+    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
+        if (request != null) {
+            http.addRequestProperty("Content-Type", "application/json");
+            String reqData = new Gson().toJson(request);
+            try (OutputStream reqBody = http.getOutputStream()) {
+                reqBody.write(reqData.getBytes());
+            }
+        }
+    }
+
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, server.ResponseException {
+        var status = http.getResponseCode();
+        if (!isSuccessful(status)) {
+            try (InputStream respErr = http.getErrorStream()) {
+                if (respErr != null) {
+                    throw server.ResponseException.fromJson(respErr);
                 }
-                return response.toString();
             }
-        } else {
-            throw new IOException("Request failed with response code: " + responseCode);
+
+            throw new server.ResponseException(status, "other failure: " + status);
         }
     }
 
-    private HttpURLConnection getHttpURLConnection(String endpoint, String method, String body) throws IOException {
-        URI uri = URI.create(serverUrl + endpoint);
-        URL url = URL.of(uri, null);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod(method);
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setDoOutput(true);
-
-        if (body != null && !body.isEmpty()) {
-            try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = body.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
+    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
+        T response = null;
+        if (http.getContentLength() < 0) {
+            try (InputStream respBody = http.getInputStream()) {
+                InputStreamReader reader = new InputStreamReader(respBody);
+                if (responseClass != null) {
+                    response = new Gson().fromJson(reader, responseClass);
+                }
             }
         }
-        return connection;
+        return response;
     }
 
-    public String registerUser(String jsonRequest) throws IOException {
-        return sendRequest("/user", "POST", jsonRequest);
-    }
 
-    public String loginUser(String jsonRequest) throws IOException {
-        return sendRequest("/session", "POST", jsonRequest);
-    }
-
-    public String logoutUser() throws IOException {
-        return sendRequest("/session", "DELETE", null);
-    }
-
-    public String clearDatabase() throws IOException {
-        return sendRequest("/db", "DELETE", null);
-    }
-
-    public String listGames() throws IOException {
-        return sendRequest("/game", "GET", null);
-    }
-
-    public String createGame(String jsonRequest) throws IOException {
-        return sendRequest("/game", "POST", jsonRequest);
-    }
-
-    public String joinGame(String jsonRequest) throws IOException {
-        return sendRequest("/game", "PUT", jsonRequest);
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
     }
 }
