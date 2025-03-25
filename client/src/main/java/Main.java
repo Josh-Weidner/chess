@@ -45,48 +45,46 @@ public class Main {
             System.out.print(prompt);
             String cmd = scanner.next();
 
-            if (registeredUsername.isEmpty()) {
-                if (cmd.equalsIgnoreCase("register")) {
-                    Register();
-                }
-                else if (cmd.equalsIgnoreCase("login")) {
-                    Login();
-                }
-                else if (cmd.equalsIgnoreCase("quit")) {
-                    System.exit(0);
-                }
-                else if (cmd.equalsIgnoreCase("help")) {
-                    DisplayCommands();
-                }
+            if (cmd.equalsIgnoreCase("quit")) {
+                System.exit(0);
             }
+
             else {
-                if (cmd.equalsIgnoreCase("create")) {
-                    Create();
-                }
-                else if (cmd.equalsIgnoreCase("list")) {
-                    List();
-                }
-                else if (cmd.equalsIgnoreCase("join")) {
-                    Join();
-                }
-                else if (cmd.equalsIgnoreCase("observe")) {
-                    Observe();
-                }
-                else if (cmd.equalsIgnoreCase("logout")) {
-                    Logout();
-                }
-                else if (cmd.equalsIgnoreCase("quit")) {
-                    System.exit(0);
-                }
-                else if (cmd.equalsIgnoreCase("help")) {
+                if (cmd.equalsIgnoreCase("help")) {
                     DisplayCommands();
                 }
+                else if (registeredUsername.isEmpty()) {
+                    if (cmd.equalsIgnoreCase("register")) {
+                        Register();
+                    }
+                    else if (cmd.equalsIgnoreCase("login")) {
+                        Login();
+                    }
+                }
+                else {
+                    if (cmd.equalsIgnoreCase("create")) {
+                        Create();
+                    }
+                    else if (cmd.equalsIgnoreCase("list")) {
+                        List();
+                    }
+                    else if (cmd.equalsIgnoreCase("join")) {
+                        Join();
+                    }
+                    else if (cmd.equalsIgnoreCase("observe")) {
+                        Observe();
+                    }
+                    else if (cmd.equalsIgnoreCase("logout")) {
+                        Logout();
+                    }
+                }
+                NextCommand();
             }
+
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand();
     }
 
     private static void Register() {
