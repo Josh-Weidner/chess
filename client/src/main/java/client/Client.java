@@ -114,7 +114,8 @@ public class Client {
 
         server.joinGame(new JoinRequest(teamColor, game.gameID()), authToken);
 
-        return String.format("You have joined the game: " + SET_TEXT_BOLD + game.gameName());
+        return "You have joined the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
+                printGame(new ChessBoard(), teamColor);
     }
 
     private String observe(String... params) throws ResponseException {
@@ -127,7 +128,8 @@ public class Client {
             throw new ResponseException(400, "Game does not exist!");
         }
 
-        return String.format("You are now observing the game: " + SET_TEXT_BOLD + game.gameName());
+        return "You are now observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
+                printGame(new ChessBoard(), ChessGame.TeamColor.WHITE);
     }
 
     private int getGameId(String gameString) throws ResponseException {
@@ -170,11 +172,11 @@ public class Client {
         return builder.toString();
     }
 
-    private String printGame(ChessBoard game, ChessGame.TeamColor team) throws ResponseException {
+    private String printGame(ChessBoard game, ChessGame.TeamColor team) {
         return buildBoard(game, team);
     }
 
-    private String buildBoard(ChessBoard game, ChessGame.TeamColor team) throws ResponseException {
+    private String buildBoard(ChessBoard game, ChessGame.TeamColor team){
         StringBuilder board = new StringBuilder();
 
         // First row
@@ -202,7 +204,7 @@ public class Client {
                     board.append(SET_BG_COLOR_BLACK + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
                 }
             }
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
         }
 
         // Last row
@@ -228,7 +230,7 @@ public class Client {
         };
     }
 
-    private ChessPiece[][] flipBoard(ChessBoard board) throws ResponseException {
+    private ChessPiece[][] flipBoard(ChessBoard board){
         ChessPiece[][] matrix = new ChessPiece[8][8];
 
         int rows = board.chessBoard.length;
