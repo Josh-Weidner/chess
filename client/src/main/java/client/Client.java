@@ -172,14 +172,48 @@ public class Client {
 
     private String printGame(ChessBoard game, ChessGame.TeamColor team) throws ResponseException {
         StringBuilder board = new StringBuilder();
-        board.append(SET_BG_COLOR_MAGENTA + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + RESET_BG_COLOR + "\n");
-        if (team == ChessGame.TeamColor.BLACK) {
-            game.
-        }
-        else {
+        board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
 
+        int rows = game.chessBoard.length;
+        int cols = game.chessBoard[0].length;
+        for (int i = 0; i < rows; i++) {
+            int rowNum = 8 - i;
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+            for (int j = 0; j < cols; j++) {
+                ChessPiece chessPiece = game.chessBoard[i][j];
+                String pieceString = getPieceString(chessPiece);
+                if (i + j % 2 == 0) {
+                    board.append(SET_BG_COLOR_WHITE + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
+                }
+                else {
+                    board.append(SET_BG_COLOR_BLACK + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
+                }
+            }
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
         }
-        board.append(SET_BG_COLOR_MAGENTA + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + RESET_BG_COLOR + "\n");
+
+        board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
+    }
+
+    private String getPieceString(ChessPiece chessPiece) {
+        if (chessPiece == null) {
+            return "";
+        }
+
+        String prefix = (chessPiece.getTeamColor() == ChessGame.TeamColor.WHITE) ? "WHITE_" : "BLACK_";
+
+        return switch (chessPiece.getPieceType()) {
+            case KING -> prefix + "KING";
+            case QUEEN -> prefix + "QUEEN";
+            case ROOK -> prefix + "ROOK";
+            case BISHOP -> prefix + "BISHOP";
+            case KNIGHT -> prefix + "KNIGHT";
+            case PAWN -> prefix + "PAWN";
+            default -> "";
+        };
+    }
+
+        return "";
     }
 
     private ChessBoard flipBoard(ChessBoard board) throws ResponseException {
