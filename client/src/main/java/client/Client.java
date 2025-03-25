@@ -1,7 +1,8 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
-import server.*;
+import chess.ChessPiece;
 import service.create.CreateRequest;
 import service.join.JoinRequest;
 import service.list.GameDataModel;
@@ -169,4 +170,39 @@ public class Client {
         return builder.toString();
     }
 
+    private String printGame(ChessBoard game, ChessGame.TeamColor team) throws ResponseException {
+        StringBuilder board = new StringBuilder();
+        board.append(SET_BG_COLOR_MAGENTA + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + RESET_BG_COLOR + "\n");
+        if (team == ChessGame.TeamColor.BLACK) {
+            game.
+        }
+        else {
+
+        }
+        board.append(SET_BG_COLOR_MAGENTA + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + RESET_BG_COLOR + "\n");
+    }
+
+    private ChessBoard flipBoard(ChessBoard board) throws ResponseException {
+        int rows = board.chessBoard.length;
+        int cols = board.chessBoard[0].length;
+
+        for (int i = 0; i < rows / 2; i++) {
+            for (int j = 0; j < cols; j++) {
+                // Swap element with it's vertically opposite counterpart
+                ChessPiece temp = board.chessBoard[i][j];
+                board.chessBoard[i][j] = board.chessBoard[rows - i - 1][cols - j - 1];
+                board.chessBoard[rows - i - 1][cols - j - 1] = temp;
+            }
+        }
+
+        // If rows are odd, reverse the middle row
+        if (rows % 2 != 0) {
+            int mid = rows / 2;
+            for (int j = 0; j < cols / 2; j++) {
+                ChessPiece temp = board.chessBoard[mid][j];
+                board.chessBoard[mid][j] = board.chessBoard[mid][cols - j - 1];
+                board.chessBoard[mid][cols - j - 1] = temp;
+            }
+        }
+    }
 }
