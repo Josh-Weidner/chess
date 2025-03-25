@@ -18,8 +18,8 @@ public class ServerFacadeTests {
 
     private static Server server;
     static ServerFacade facade;
-    private static final RegisterRequest registerRequest = new RegisterRequest("newUser", "newPassword", "newEmail");
-    private static final CreateRequest createRequest = new CreateRequest("newGame");
+    private static final RegisterRequest REGISTER_REQUEST = new RegisterRequest("newUser", "newPassword", "newEmail");
+    private static final CreateRequest CREATE_REQUEST = new CreateRequest("newGame");
     private static String newAuthToken = "";
     private static int newGameId;
 
@@ -40,13 +40,13 @@ public class ServerFacadeTests {
     @Test
     @Order(2)
     void validRegister() {
-        RegisterResult registerResult = assertDoesNotThrow(() -> facade.registerUser(registerRequest));
+        RegisterResult registerResult = assertDoesNotThrow(() -> facade.registerUser(REGISTER_REQUEST));
         newAuthToken = registerResult.authToken();
     }
 
     @Test
     @Order(3)
-    void invalidRegister() {assertThrows(ResponseException.class, () -> facade.registerUser(registerRequest));
+    void invalidRegister() {assertThrows(ResponseException.class, () -> facade.registerUser(REGISTER_REQUEST));
     }
 
     @Test
@@ -64,14 +64,14 @@ public class ServerFacadeTests {
     @Test
     @Order(6)
     void validCreateGame() {
-        var createResult = assertDoesNotThrow(() -> facade.createGame(createRequest, newAuthToken));
+        var createResult = assertDoesNotThrow(() -> facade.createGame(CREATE_REQUEST, newAuthToken));
         newGameId = createResult.gameID();
     }
 
     @Test
     @Order(7)
     void invalidCreateGame() {
-        assertThrows(ResponseException.class, () -> facade.createGame(createRequest, ""));
+        assertThrows(ResponseException.class, () -> facade.createGame(CREATE_REQUEST, ""));
     }
 
     // Since it will always create a game, what we can actually check is if it gets and authToken
