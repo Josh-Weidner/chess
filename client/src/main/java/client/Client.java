@@ -3,7 +3,6 @@ package client;
 import chess.ChessGame;
 import server.*;
 import service.create.CreateRequest;
-import service.create.CreateResult;
 import service.join.JoinRequest;
 import service.list.GameDataModel;
 import service.list.ListResult;
@@ -75,7 +74,7 @@ public class Client {
     private String create(String... params) throws ResponseException {
         if (params.length != 1) { throw new ResponseException(400, "Expected: <Name>"); }
 
-        CreateResult createResult = server.createGame(new CreateRequest(params[0]), authToken);
+        server.createGame(new CreateRequest(params[0]), authToken);
 
         return String.format("Game " + SET_TEXT_BOLD + params[0] + " has been created!");
     }
