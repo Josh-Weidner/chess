@@ -189,13 +189,14 @@ public class Client {
         // Print board
         int rows = matrix.length;
         int cols = matrix[0].length;
+        int rowNum = (team == ChessGame.TeamColor.BLACK) ? 0 : 9;
         for (int i = 0; i < rows; i++) {
-            int rowNum = 8 - i;
+            rowNum = (team == ChessGame.TeamColor.BLACK) ? rowNum + 1 : rowNum - 1;
             board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
             for (int j = 0; j < cols; j++) {
                 ChessPiece chessPiece = matrix[i][j];
                 String pieceString = getPieceString(chessPiece);
-                if (i + j % 2 == 0) {
+                if ((i + j) % 2 == 0) {
                     board.append(SET_BG_COLOR_WHITE + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
                 } else {
                     board.append(SET_BG_COLOR_BLACK + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
