@@ -6,7 +6,7 @@ import dataaccess.mysql.MySqlAuthDataAccess;
 import dataaccess.mysql.MySqlGameDataAccess;
 import dataaccess.mysql.MySqlUserDataAccess;
 import org.junit.jupiter.api.*;
-import server.ResponseException;
+import exception.ResponseException;
 import model.create.CreateRequest;
 import model.create.CreateResult;
 import model.join.JoinRequest;

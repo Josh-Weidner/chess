@@ -5,7 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
-import server.ResponseException;
+import exception.ResponseException;
 import model.create.CreateRequest;
 import model.create.CreateResult;
 import model.join.JoinRequest;

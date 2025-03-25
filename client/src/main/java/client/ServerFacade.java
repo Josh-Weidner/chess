@@ -9,6 +9,7 @@ import model.login.LoginRequest;
 import model.login.LoginResult;
 import model.register.RegisterRequest;
 import model.register.RegisterResult;
+import exception.ResponseException;
 
 import java.io.*;
 import java.net.*;
@@ -17,8 +18,8 @@ public class ServerFacade {
 
     private final String serverUrl;
 
-    public ServerFacade(int Port) {
-        this.serverUrl = "http://localhost:" + Port;
+    public ServerFacade(int port) {
+        this.serverUrl = "http://localhost:" + port;
     }
 
 
