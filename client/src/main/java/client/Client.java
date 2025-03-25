@@ -248,7 +248,9 @@ public class Client {
         }
 
         if (chessPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return getString(chessPiece, BLACK_KING, BLACK_QUEEN, BLACK_ROOK, BLACK_BISHOP, BLACK_KNIGHT, BLACK_PAWN);
+            return getString(chessPiece, SET_TEXT_COLOR_DARK_GREY + BLACK_KING + RESET_TEXT_COLOR, SET_TEXT_COLOR_DARK_GREY + BLACK_QUEEN + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_ROOK + RESET_TEXT_COLOR, SET_TEXT_COLOR_DARK_GREY + BLACK_BISHOP + RESET_TEXT_COLOR,
+                    SET_TEXT_COLOR_DARK_GREY + BLACK_KNIGHT + RESET_TEXT_COLOR, SET_TEXT_COLOR_DARK_GREY + BLACK_PAWN + RESET_TEXT_COLOR);
         }
         else {
             return getString(chessPiece, WHITE_KING, WHITE_QUEEN, WHITE_ROOK, WHITE_BISHOP, WHITE_KNIGHT, WHITE_PAWN);
