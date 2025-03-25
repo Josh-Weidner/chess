@@ -21,7 +21,7 @@ public class Main {
 
     static Scanner scanner = new Scanner(System.in);
     static Gson gson = new Gson();
-    Server server = new Server();
+    static Server server = new Server();
     static int port = server.run(800);
     static ServerFacade serverFacade = new ServerFacade(Integer.toString(port));
     static String registeredUsername = "";
@@ -36,51 +36,57 @@ public class Main {
         System.out.println(BLACK_QUEEN + "Chess 240. Type 'help' to get started." + BLACK_QUEEN);
         System.out.println();
 
-        NextCommand(registeredUsername);
+        NextCommand();
     }
 
-    private static void NextCommand(String username) {
-        String prompt = !username.isEmpty() ? "[" + username.toUpperCase() + "] >>> " : "[LOGGED_OUT] >>> ";
-        System.out.print(prompt);
-        String cmd = scanner.next();
+    private static void NextCommand() {
+        try {
+            String prompt = !registeredUsername.isEmpty() ? "[" + registeredUsername.toUpperCase() + "] >>> " : "[LOGGED_OUT] >>> ";
+            System.out.print(prompt);
+            String cmd = scanner.next();
 
-        if (prompt.equals("[LOGGED_OUT] >>> ")) {
-            if (cmd.equalsIgnoreCase("register")) {
-                Register();
+            if (registeredUsername.isEmpty()) {
+                if (cmd.equalsIgnoreCase("register")) {
+                    Register();
+                }
+                else if (cmd.equalsIgnoreCase("login")) {
+                    Login();
+                }
+                else if (cmd.equalsIgnoreCase("quit")) {
+                    System.exit(0);
+                }
+                else if (cmd.equalsIgnoreCase("help")) {
+                    DisplayCommands();
+                }
             }
-            else if (cmd.equalsIgnoreCase("login")) {
-                Login();
-            }
-            else if (cmd.equalsIgnoreCase("quit")) {
-                System.exit(0);
-            }
-            else if (cmd.equalsIgnoreCase("help")) {
-                DisplayCommands(username);
+            else {
+                if (cmd.equalsIgnoreCase("create")) {
+                    Create();
+                }
+                else if (cmd.equalsIgnoreCase("list")) {
+                    List();
+                }
+                else if (cmd.equalsIgnoreCase("join")) {
+                    Join();
+                }
+                else if (cmd.equalsIgnoreCase("observe")) {
+                    Observe();
+                }
+                else if (cmd.equalsIgnoreCase("logout")) {
+                    Logout();
+                }
+                else if (cmd.equalsIgnoreCase("quit")) {
+                    System.exit(0);
+                }
+                else if (cmd.equalsIgnoreCase("help")) {
+                    DisplayCommands();
+                }
             }
         }
-        else {
-            if (cmd.equalsIgnoreCase("create")) {
-                Create();
-            }
-            else if (cmd.equalsIgnoreCase("list")) {
-                List();
-            }
-            else if (cmd.equalsIgnoreCase("join")) {
-                Join();
-            }
-            else if (cmd.equalsIgnoreCase("observe")) {
-                Observe();
-            }
-            else if (cmd.equalsIgnoreCase("logout")) {
-                Logout();
-            }
-            else if (cmd.equalsIgnoreCase("quit")) {
-                System.exit(0);
-            }
-            else if (cmd.equalsIgnoreCase("help")) {
-                DisplayCommands(username);
-            }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
         }
+        NextCommand();
     }
 
     private static void Register() {
@@ -104,7 +110,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
     }
 
     private static void Login() {
@@ -126,7 +131,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
     }
 
     private static void Create() {
@@ -144,7 +148,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
     }
 
     private static void List() {
@@ -169,7 +172,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
     }
 
     private static void Join() {
@@ -191,7 +193,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
     }
 
     private static void Observe() {
@@ -203,7 +204,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
     }
 
     private static void Logout() {
@@ -216,12 +216,10 @@ public class Main {
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        NextCommand(registeredUsername);
-
     }
 
-    private static void DisplayCommands(String username) {
-        if (username.isEmpty()) {
+    private static void DisplayCommands() {
+        if (registeredUsername.isEmpty()) {
             System.out.println(SET_TEXT_COLOR_MAGENTA + "    register <USERNAME> <PASSWORD> <EMAIL>" + RESET_TEXT_COLOR + " - to create an account");
             System.out.println(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess");
             System.out.println(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program");
