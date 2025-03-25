@@ -50,6 +50,7 @@ public class Client {
                 case "join" -> join(params);
                 case "list" -> list();
                 case "observe" -> observe(params);
+                case "logout" -> logout();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -57,107 +58,126 @@ public class Client {
         }
     }
 
-    private void register(String... params) throws ResponseException {
+    private String register(String... params) throws ResponseException {
         if (params.length != 3) { throw new ResponseException(400, "Expected: <username> <password> <email>"); }
 
         RegisterResult registerResult = server.registerUser(new RegisterRequest(params[0], params[1], params[2]));
 
         username = registerResult.username();
         authToken = registerResult.authToken();
+        state = State.SIGNEDIN;
 
-        System.out.println("Welcome " + SET_TEXT_BOLD + username + "!");
+        return String.format("Welcome " + SET_TEXT_BOLD + username + "!");
     }
 
-    private void login(String... params) throws ResponseException {
+    private String login(String... params) throws ResponseException {
         if (params.length != 2) { throw new ResponseException(400, "Expected: <username> <password>"); }
 
         LoginResult loginResult = server.loginUser(new LoginRequest(params[0], params[1]));
 
         username = loginResult.username();
         authToken = loginResult.authToken();
+        state = State.SIGNEDIN;
 
-        System.out.println("Welcome " + SET_TEXT_BOLD + username + "!");
+        return String.format("Welcome " + SET_TEXT_BOLD + username + "!");
     }
 
-    private void create(String... params) throws ResponseException {
+    private String create(String... params) throws ResponseException {
         if (params.length != 1) { throw new ResponseException(400, "Expected: <Name>"); }
 
         CreateResult createResult = server.createGame(new CreateRequest(params[0]), authToken);
 
-        System.out.println("Game " + SET_TEXT_BOLD + params[0] + " has been created!");
+        return String.format("Game " + SET_TEXT_BOLD + params[0] + " has been created!");
     }
 
-    private void list() throws ResponseException {
+    private String list() throws ResponseException {
         ListResult listResult = server.listGames(authToken);
 
         gameData = new HashMap<>();
-        int gameNumber = 1;
         if (listResult.games() != null) {
-            System.out.println("     Game Name:    White Username:    Black Username:    ");
+            StringBuilder gameList = new StringBuilder();
+            gameList.append("     Game Name:    White Username:    Black Username:    \n");
+            int gameNumber = 1;
             for (GameDataModel game: listResult.games()) {
                 gameData.put(gameNumber, game);
-                System.out.println("(" + gameNumber + ") " + game.gameName() + game.whiteUsername() + game.blackUsername());
+                gameList.append("(").append(gameNumber).append(") ").append(game.gameName()).append(game.whiteUsername()).append(game.blackUsername());
             }
+            return gameList.toString();
         }
         else {
-            System.out.println("No games found");
+            return "No games found";
         }
     }
 
-    private void join(String... params) throws ResponseException {
+    private String join(String... params) throws ResponseException {
         if (params.length != 2) { throw new ResponseException(400, "Expected: <Name>"); }
-            ChessGame.TeamColor teamColor = ChessGame.TeamColor.valueOf(params[1]);
 
-            GameDataModel game = ActiveGames.get(gameId);
+        int gameId = getGameId(params[0]);
 
-            JoinRequest joinRequest = new JoinRequest(teamColor, game.gameID());
+        if (!params[1].equals("WHITE") && !params[1].equals("BLACK")) { throw new ResponseException(400, "Invalid team color!"); }
 
-            serverFacade.joinGame(joinRequest, authToken);
+        ChessGame.TeamColor teamColor = ChessGame.TeamColor.valueOf(params[1]);
+        GameDataModel game = gameData.get(gameId);
+        if (game == null) {
+            throw new ResponseException(400, "Game does not exist!");
+        }
 
-            System.out.println("Game " + SET_TEXT_BOLD + game.gameName() + " has been joined!");
+        server.joinGame(new JoinRequest(teamColor, game.gameID()), authToken);
+
+        return String.format("You have joined the game: " + SET_TEXT_BOLD + game.gameName());
     }
 
-    private void Observe() {
+    private String observe(String... params) throws ResponseException {
+        if (params.length != 1) { throw new ResponseException(400, "Expected: <Name>"); }
+
+        int gameId = getGameId(params[0]);
+
+        GameDataModel game = gameData.get(gameId);
+        if (game == null) {
+            throw new ResponseException(400, "Game does not exist!");
+        }
+
+        return String.format("You are now observing the game: " + SET_TEXT_BOLD + game.gameName());
+    }
+
+    private int getGameId(String gameString) throws ResponseException {
+        int gameId;
         try {
-            Integer gameId = scanner.nextInt();
-
-            GameDataModel game = ActiveGames.get(gameId);
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
+            gameId = Integer.parseInt(gameString);
+            return gameId;
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Invalid gameId: " + gameString);
         }
     }
 
-    private void Logout() {
-        try {
-            serverFacade.logoutUser(authToken);
+    private String logout() throws ResponseException {
+        server.logoutUser(authToken);
 
-            registeredUsername = "";
-            authToken = "";
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        username = "";
+        authToken = "";
+        state = State.SIGNEDOUT;
+
+        return "Successfully logged out!";
     }
 
-    private void DisplayCommands() {
+    private String help() {
+        StringBuilder builder = new StringBuilder();
         if (state == State.SIGNEDOUT) {
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    register <USERNAME> <PASSWORD> <EMAIL>" + RESET_TEXT_COLOR + " - to create an account");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands");
-            System.out.println();
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    register <USERNAME> <PASSWORD> <EMAIL>" + RESET_TEXT_COLOR + " - to create an account \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands \n");
         }
         else {
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    create <NAME>" + RESET_TEXT_COLOR + " - a game");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    list" + RESET_TEXT_COLOR + " - games");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    join <ID> [WHITE/BLACK]" + RESET_TEXT_COLOR + " - a game");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    observe <ID>" + RESET_TEXT_COLOR + " - a game");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    logout" + RESET_TEXT_COLOR + " - when you are done");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program");
-            System.out.println(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands");
-            System.out.println();
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    create <NAME>" + RESET_TEXT_COLOR + " - a game \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    list" + RESET_TEXT_COLOR + " - games \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    join <ID> [WHITE/BLACK]" + RESET_TEXT_COLOR + " - a game \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    observe <ID>" + RESET_TEXT_COLOR + " - a game \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    logout" + RESET_TEXT_COLOR + " - when you are done \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands \n");
         }
+        return builder.toString();
     }
 
 }
