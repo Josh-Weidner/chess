@@ -247,24 +247,21 @@ public class Client {
         }
 
         if (chessPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return switch (chessPiece.getPieceType()) {
-                case KING -> BLACK_KING;
-                case QUEEN -> BLACK_QUEEN;
-                case ROOK -> BLACK_ROOK;
-                case BISHOP -> BLACK_BISHOP;
-                case KNIGHT -> BLACK_KNIGHT;
-                case PAWN -> BLACK_PAWN;
-            };
+            return getString(chessPiece, BLACK_KING, BLACK_QUEEN, BLACK_ROOK, BLACK_BISHOP, BLACK_KNIGHT, BLACK_PAWN);
         }
         else {
-            return switch (chessPiece.getPieceType()) {
-                case KING -> WHITE_KING;
-                case QUEEN -> WHITE_QUEEN;
-                case ROOK -> WHITE_ROOK;
-                case BISHOP -> WHITE_BISHOP;
-                case KNIGHT -> WHITE_KNIGHT;
-                case PAWN -> WHITE_PAWN;
-            };
+            return getString(chessPiece, WHITE_KING, WHITE_QUEEN, WHITE_ROOK, WHITE_BISHOP, WHITE_KNIGHT, WHITE_PAWN);
         }
+    }
+
+    private String getString(ChessPiece chessPiece, String whiteKing, String whiteQueen, String whiteRook, String whiteBishop, String whiteKnight, String whitePawn) {
+        return switch (chessPiece.getPieceType()) {
+            case KING -> whiteKing;
+            case QUEEN -> whiteQueen;
+            case ROOK -> whiteRook;
+            case BISHOP -> whiteBishop;
+            case KNIGHT -> whiteKnight;
+            case PAWN -> whitePawn;
+        };
     }
 }
