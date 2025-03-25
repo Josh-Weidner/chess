@@ -11,18 +11,7 @@ public class ServerFacade {
     }
 
     private String sendRequest(String endpoint, String method, String body) throws IOException {
-        URL url = new URL(serverUrl + endpoint);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod(method);
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setDoOutput(true);
-
-        if (body != null && !body.isEmpty()) {
-            try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = body.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-        }
+        HttpURLConnection connection = getHttpURLConnection(endpoint, method, body);
 
         int responseCode = connection.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
@@ -37,6 +26,22 @@ public class ServerFacade {
         } else {
             throw new IOException("Request failed with response code: " + responseCode);
         }
+    }
+
+    private HttpURLConnection getHttpURLConnection(String endpoint, String method, String body) throws IOException {
+        URL url = new URL(serverUrl + endpoint);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod(method);
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+
+        if (body != null && !body.isEmpty()) {
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = body.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+        }
+        return connection;
     }
 
     public String registerUser(String jsonRequest) throws IOException {
