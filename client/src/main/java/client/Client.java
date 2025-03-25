@@ -171,28 +171,43 @@ public class Client {
     }
 
     private String printGame(ChessBoard game, ChessGame.TeamColor team) throws ResponseException {
+        return buildBoard(game, team);
+    }
+
+    private String buildBoard(ChessBoard game, ChessGame.TeamColor team) throws ResponseException {
         StringBuilder board = new StringBuilder();
+
+        // First row
         board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
 
-        int rows = game.chessBoard.length;
-        int cols = game.chessBoard[0].length;
+        ChessPiece[][] matrix = game.chessBoard;
+        // Flip board if black username
+        if (team == ChessGame.TeamColor.BLACK) {
+            matrix = flipBoard(game);
+        }
+
+        // Print board
+        int rows = matrix.length;
+        int cols = matrix[0].length;
         for (int i = 0; i < rows; i++) {
             int rowNum = 8 - i;
             board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
             for (int j = 0; j < cols; j++) {
-                ChessPiece chessPiece = game.chessBoard[i][j];
+                ChessPiece chessPiece = matrix[i][j];
                 String pieceString = getPieceString(chessPiece);
                 if (i + j % 2 == 0) {
                     board.append(SET_BG_COLOR_WHITE + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
-                }
-                else {
+                } else {
                     board.append(SET_BG_COLOR_BLACK + " ").append(pieceString).append(" ").append(RESET_BG_COLOR);
                 }
             }
             board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
         }
 
+        // Last row
         board.append(SET_BG_COLOR_MAGENTA + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   " + RESET_BG_COLOR + "\n");
+
+        return board.toString();
     }
 
     private String getPieceString(ChessPiece chessPiece) {
@@ -209,14 +224,12 @@ public class Client {
             case BISHOP -> prefix + "BISHOP";
             case KNIGHT -> prefix + "KNIGHT";
             case PAWN -> prefix + "PAWN";
-            default -> "";
         };
     }
 
-        return "";
-    }
+    private ChessPiece[][] flipBoard(ChessBoard board) throws ResponseException {
+        ChessPiece[][] matrix = new ChessPiece[8][8];
 
-    private ChessBoard flipBoard(ChessBoard board) throws ResponseException {
         int rows = board.chessBoard.length;
         int cols = board.chessBoard[0].length;
 
@@ -224,8 +237,8 @@ public class Client {
             for (int j = 0; j < cols; j++) {
                 // Swap element with it's vertically opposite counterpart
                 ChessPiece temp = board.chessBoard[i][j];
-                board.chessBoard[i][j] = board.chessBoard[rows - i - 1][cols - j - 1];
-                board.chessBoard[rows - i - 1][cols - j - 1] = temp;
+                matrix[i][j] = board.chessBoard[rows - i - 1][cols - j - 1];
+                matrix[rows - i - 1][cols - j - 1] = temp;
             }
         }
 
@@ -234,9 +247,11 @@ public class Client {
             int mid = rows / 2;
             for (int j = 0; j < cols / 2; j++) {
                 ChessPiece temp = board.chessBoard[mid][j];
-                board.chessBoard[mid][j] = board.chessBoard[mid][cols - j - 1];
-                board.chessBoard[mid][cols - j - 1] = temp;
+                matrix[mid][j] = board.chessBoard[mid][cols - j - 1];
+                matrix[mid][cols - j - 1] = temp;
             }
         }
+
+        return matrix;
     }
 }
