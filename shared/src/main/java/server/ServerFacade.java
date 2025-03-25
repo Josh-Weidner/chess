@@ -1,9 +1,6 @@
 package server;
 
 import com.google.gson.Gson;
-import exception.ErrorResponse;
-import exception.ResponseException;
-import model.Pet;
 import service.create.CreateRequest;
 import service.create.CreateResult;
 import service.join.JoinRequest;
@@ -18,10 +15,10 @@ import java.net.*;
 
 public class ServerFacade {
 
-    private final String serverUrl;
+    private final int serverUrl;
 
-    public ServerFacade(String url) {
-        serverUrl = url;
+    public ServerFacade(int Port) {
+        serverUrl = Port;
     }
 
 

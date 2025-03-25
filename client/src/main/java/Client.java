@@ -1,9 +1,7 @@
-
+package client;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 import server.*;
-import server.ServerFacade;
 import service.create.CreateRequest;
 import service.create.CreateResult;
 import service.join.JoinRequest;
@@ -14,10 +12,8 @@ import service.login.LoginResult;
 import service.register.RegisterRequest;
 import service.register.RegisterResult;
 
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
@@ -26,16 +22,10 @@ public class Client {
     private String authToken = null;
     private HashMap<Integer, GameDataModel> gameData;
     private final ServerFacade server;
-    private final String serverUrl;
-    private final GameHandler gameHandler;
-    private final UserHandler userHandler;
-    private State state = State.SIGNEDOUT;
+    private boolean isLoggedIn = false;
 
-    public Client(String serverUrl, GameHandler gameHandler, UserHandler userHandler) {
+    public Client(int serverUrl) {
         server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
-        this.gameHandler = gameHandler;
-        this.userHandler = userHandler;
     }
 
     public String eval(String input) {
@@ -65,7 +55,7 @@ public class Client {
 
         username = registerResult.username();
         authToken = registerResult.authToken();
-        state = State.SIGNEDIN;
+        isLoggedIn = true;
 
         return String.format("Welcome " + SET_TEXT_BOLD + username + "!");
     }
@@ -77,7 +67,7 @@ public class Client {
 
         username = loginResult.username();
         authToken = loginResult.authToken();
-        state = State.SIGNEDIN;
+        isLoggedIn = true;
 
         return String.format("Welcome " + SET_TEXT_BOLD + username + "!");
     }
@@ -155,14 +145,14 @@ public class Client {
 
         username = "";
         authToken = "";
-        state = State.SIGNEDOUT;
+        isLoggedIn = false;
 
         return "Successfully logged out!";
     }
 
-    private String help() {
+    public String help() {
         StringBuilder builder = new StringBuilder();
-        if (state == State.SIGNEDOUT) {
+        if (!isLoggedIn) {
             builder.append(SET_TEXT_COLOR_MAGENTA + "    register <USERNAME> <PASSWORD> <EMAIL>" + RESET_TEXT_COLOR + " - to create an account \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");

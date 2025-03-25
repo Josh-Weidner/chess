@@ -1,18 +1,5 @@
-import chess.ChessGame;
-import com.google.gson.Gson;
-import server.Server;
-import service.create.CreateRequest;
-import service.create.CreateResult;
-import service.join.JoinRequest;
-import service.list.GameDataModel;
-import service.list.ListResult;
-import service.login.LoginRequest;
-import service.login.LoginResult;
-import service.register.RegisterRequest;
-import service.register.RegisterResult;
+import client.Client;
 
-import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -21,8 +8,8 @@ import static ui.EscapeSequences.RESET_TEXT_COLOR;
 public class Repl {
     private final Client client;
 
-    public Repl(String serverUrl) {
-        client = new Client(serverUrl, this);
+    public Repl(int serverUrl) {
+        client = new Client(serverUrl);
     }
 
     public void run() {

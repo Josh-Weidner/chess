@@ -1,12 +1,5 @@
-import client.*;
-
 public class Main {
     public static void main(String[] args) {
-        var serverUrl = "http://localhost:8080";
-        if (args.length > 0) {
-            serverUrl = args[0];
-        }
-
-        new Repl(serverUrl).run();
+        new Repl(8080).run();
     }
 }

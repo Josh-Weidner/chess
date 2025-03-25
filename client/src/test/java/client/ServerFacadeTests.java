@@ -2,6 +2,7 @@ package client;
 
 import org.junit.jupiter.api.*;
 import server.Server;
+import server.ServerFacade;
 
 public class ServerFacadeTests {
 
