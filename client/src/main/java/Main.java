@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import server.Server;
 import service.create.CreateRequest;
 import service.create.CreateResult;
+import service.join.JoinRequest;
 import service.list.GameDataModel;
 import service.list.ListResult;
 import service.login.LoginRequest;
@@ -176,7 +177,47 @@ public class Main {
             Integer gameId = scanner.nextInt();
             String color = scanner.next();
             ChessGame.TeamColor teamColor = ChessGame.TeamColor.valueOf(color);
+
+            GameDataModel game = ActiveGames.get(gameId);
+
+            JoinRequest joinRequest = new JoinRequest(teamColor, game.gameID());
+
+            String json = gson.toJson(joinRequest);
+
+            serverFacade.joinGame(json, authToken);
+
+            System.out.println("Game " + SET_TEXT_BOLD + game.gameName() + " has been joined!");
         }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        NextCommand(registeredUsername);
+    }
+
+    private static void Observe() {
+        try {
+            Integer gameId = scanner.nextInt();
+
+            GameDataModel game = ActiveGames.get(gameId);
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        NextCommand(registeredUsername);
+    }
+
+    private static void Logout() {
+        try {
+            serverFacade.logoutUser(authToken);
+
+            registeredUsername = "";
+            authToken = "";
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        NextCommand(registeredUsername);
+
     }
 
     private static void DisplayCommands(String username) {
