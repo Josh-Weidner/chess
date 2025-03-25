@@ -35,8 +35,8 @@ public class ServerFacade {
         makeRequest("/session", "DELETE", null, null, authToken);
     }
 
-    public void clearDatabase(String authToken) throws ResponseException {
-        makeRequest("/db", "DELETE", null, null, authToken);
+    public void clearDatabase() throws ResponseException {
+        makeRequest("/db", "DELETE", null, null, null);
     }
 
     public ListResult listGames(String authToken) throws ResponseException {
