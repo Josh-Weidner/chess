@@ -1,5 +1,10 @@
+import chess.ChessGame;
 import com.google.gson.Gson;
 import server.Server;
+import service.create.CreateRequest;
+import service.create.CreateResult;
+import service.list.GameDataModel;
+import service.list.ListResult;
 import service.login.LoginRequest;
 import service.login.LoginResult;
 import service.register.RegisterRequest;
@@ -8,6 +13,7 @@ import service.register.RegisterResult;
 import static ui.EscapeSequences.*;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
@@ -18,6 +24,8 @@ public class Main {
     static int port = server.run(800);
     static ServerFacade serverFacade = new ServerFacade(Integer.toString(port));
     static String registeredUsername = "";
+    static String authToken = "";
+    static HashMap<Integer, GameDataModel> ActiveGames;
 
     public static void main(String[] args) throws MalformedURLException {
 //        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -43,7 +51,7 @@ public class Main {
                 Login();
             }
             else if (cmd.equalsIgnoreCase("quit")) {
-                Quit();
+                System.exit(0);
             }
             else if (cmd.equalsIgnoreCase("help")) {
                 DisplayCommands(username);
@@ -66,7 +74,7 @@ public class Main {
                 Logout();
             }
             else if (cmd.equalsIgnoreCase("quit")) {
-                Quit();
+                System.exit(0);
             }
             else if (cmd.equalsIgnoreCase("help")) {
                 DisplayCommands(username);
@@ -88,14 +96,14 @@ public class Main {
             RegisterResult registerResult = gson.fromJson(result, RegisterResult.class);
 
             registeredUsername = registerResult.username();
+            authToken = registerResult.authToken();
 
             System.out.println("Welcome " + SET_TEXT_BOLD + registeredUsername + "!");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
-            // TODO: if not enough arguments ask again
-            // TODO: if cant register user, prompt for new username
         }
+        NextCommand(registeredUsername);
     }
 
     private static void Login() {
@@ -110,11 +118,64 @@ public class Main {
             LoginResult loginResult = gson.fromJson(result, LoginResult.class);
 
             registeredUsername = loginResult.username();
+            authToken = loginResult.authToken();
+
             System.out.println("Welcome " + SET_TEXT_BOLD + registeredUsername + "!");
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
-            // TODO: request valid credentials
+        }
+        NextCommand(registeredUsername);
+    }
+
+    private static void Create() {
+        try {
+            String gameName = scanner.next();
+
+            CreateRequest createRequest = new CreateRequest(gameName);
+            String json = gson.toJson(createRequest);
+
+            String result = serverFacade.createGame(json, authToken);
+            CreateResult createResult = gson.fromJson(result, CreateResult.class);
+
+            System.out.println("Game " + SET_TEXT_BOLD + gameName + " has been created!");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        NextCommand(registeredUsername);
+    }
+
+    private static void List() {
+        try {
+            String result = serverFacade.listGames(authToken);
+
+            ListResult listResult = gson.fromJson(result, ListResult.class);
+
+            ActiveGames = new HashMap<>();
+            int gameNumber = 1;
+            if (listResult.games() != null) {
+                System.out.println("     Game Name:    White Username:    Black Username:    ");
+                for (GameDataModel game: listResult.games()) {
+                    ActiveGames.put(gameNumber, game);
+                    System.out.println("(" + gameNumber + ") " + game.gameName() + game.whiteUsername() + game.blackUsername());
+                }
+            }
+            else {
+                System.out.println("No games found");
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        NextCommand(registeredUsername);
+    }
+
+    private static void Join() {
+        try {
+            Integer gameId = scanner.nextInt();
+            String color = scanner.next();
+            ChessGame.TeamColor teamColor = ChessGame.TeamColor.valueOf(color);
         }
     }
 
