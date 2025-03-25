@@ -6,11 +6,11 @@ import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 import server.ResponseException;
-import service.create.CreateRequest;
-import service.create.CreateResult;
-import service.join.JoinRequest;
-import service.list.GameDataModel;
-import service.list.ListResult;
+import model.create.CreateRequest;
+import model.create.CreateResult;
+import model.join.JoinRequest;
+import model.list.GameDataModel;
+import model.list.ListResult;
 
 import java.util.ArrayList;
 

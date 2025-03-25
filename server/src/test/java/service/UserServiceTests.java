@@ -7,14 +7,14 @@ import dataaccess.mysql.MySqlGameDataAccess;
 import dataaccess.mysql.MySqlUserDataAccess;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
-import service.create.CreateRequest;
-import service.create.CreateResult;
-import service.join.JoinRequest;
-import service.list.ListResult;
-import service.login.LoginRequest;
-import service.login.LoginResult;
-import service.register.RegisterRequest;
-import service.register.RegisterResult;
+import model.create.CreateRequest;
+import model.create.CreateResult;
+import model.join.JoinRequest;
+import model.list.ListResult;
+import model.login.LoginRequest;
+import model.login.LoginResult;
+import model.register.RegisterRequest;
+import model.register.RegisterResult;
 
 import static org.junit.jupiter.api.Assertions.*;
 

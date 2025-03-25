@@ -1,4 +1,4 @@
-package service.register;
+package model.register;
 
 public record RegisterResult(String username, String authToken) {
 }

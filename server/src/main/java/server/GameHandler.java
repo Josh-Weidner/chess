@@ -2,10 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import service.create.CreateRequest;
-import service.create.CreateResult;
-import service.join.JoinRequest;
-import service.list.ListResult;
+import model.create.CreateRequest;
+import model.create.CreateResult;
+import model.join.JoinRequest;
+import model.list.ListResult;
 import spark.Request;
 import spark.Response;
 import service.GameService;
