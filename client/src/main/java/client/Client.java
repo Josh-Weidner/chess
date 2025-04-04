@@ -35,6 +35,8 @@ public class Client {
     private boolean isLoggedIn = false;
     private boolean isObserver = false;
     private boolean isPlayer = false;
+    private ChessBoard board = null;
+    private ChessGame.TeamColor teamColor = null;
 
     public Client(int serverUrl, ServerMessageHandler serverMessageHandler) {
         server = new ServerFacade(serverUrl);
@@ -54,6 +56,11 @@ public class Client {
                 case "join" -> join(params);
                 case "list" -> list();
                 case "observe" -> observe(params);
+                case "redraw" -> redraw();
+                case "leave" -> leave(params);
+                case "move" -> move(params);
+                case "resign" -> resign(params);
+                case "moves" -> moves(params);
                 case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> help();
@@ -155,6 +162,15 @@ public class Client {
         return "You are now observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
                 printGame(new ChessBoard(), ChessGame.TeamColor.WHITE);
 
+    }
+
+    private String redraw() throws ResponseException {
+        if (isObserver || teamColor == ChessGame.TeamColor.WHITE) {
+            return printGame(board, ChessGame.TeamColor.WHITE);
+        }
+        else {
+            return printGame(board, ChessGame.TeamColor.BLACK);
+        }
     }
 
     private int getGameId(String gameString) throws ResponseException {
