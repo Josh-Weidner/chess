@@ -3,6 +3,8 @@ package client;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
+import client.websocket.ServerMessageHandler;
+import client.websocket.WebSocketFacade;
 import model.create.CreateRequest;
 import model.join.JoinRequest;
 import model.list.GameDataModel;
@@ -12,6 +14,7 @@ import model.login.LoginResult;
 import model.register.RegisterRequest;
 import model.register.RegisterResult;
 import exception.ResponseException;
+import server.websocket.WebSocketHandler;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,10 +26,20 @@ public class Client {
     private String authToken = null;
     private HashMap<Integer, GameDataModel> gameData;
     private final ServerFacade server;
-    private boolean isLoggedIn = false;
+    private final String serverUrl;
 
-    public Client(int serverUrl) {
+    // WebSocket
+    private final ServerMessageHandler serverMessageHandler;
+    private WebSocketFacade ws;
+
+    private boolean isLoggedIn = false;
+    private boolean isObserver = false;
+    private boolean isPlayer = false;
+
+    public Client(int serverUrl, ServerMessageHandler serverMessageHandler) {
         server = new ServerFacade(serverUrl);
+        this.serverUrl = "http://localhost:" + serverUrl;
+        this.serverMessageHandler = serverMessageHandler;
     }
 
     public String eval(String input) {
@@ -135,8 +148,13 @@ public class Client {
             throw new ResponseException(400, "Game does not exist!");
         }
 
+        ws = new WebSocketFacade(serverUrl, serverMessageHandler);
+        ws.connectToGame(authToken, game.gameID());
+        isObserver = true;
+
         return "You are now observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
                 printGame(new ChessBoard(), ChessGame.TeamColor.WHITE);
+
     }
 
     private int getGameId(String gameString) throws ResponseException {
@@ -164,6 +182,21 @@ public class Client {
         if (!isLoggedIn) {
             builder.append(SET_TEXT_COLOR_MAGENTA + "    register <USERNAME> <PASSWORD> <EMAIL>" + RESET_TEXT_COLOR + " - to create an account \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands \n");
+        }
+        else if (isObserver) {
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    redraw" + RESET_TEXT_COLOR + " - chess board \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    leave" + RESET_TEXT_COLOR + " - game \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands \n");
+        }
+        else if (isPlayer) {
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    redraw" + RESET_TEXT_COLOR + " - chess board \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    leave" + RESET_TEXT_COLOR + " - game \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    move <START_POSITION> <END_POSITION>" + RESET_TEXT_COLOR + " - make a move \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    resign" + RESET_TEXT_COLOR + " - accept the L \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    moves <POSITION>" + RESET_TEXT_COLOR + " - shows possible moves \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands \n");
         }
