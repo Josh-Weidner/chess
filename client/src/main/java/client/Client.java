@@ -15,6 +15,7 @@ import model.register.RegisterRequest;
 import model.register.RegisterResult;
 import exception.ResponseException;
 import server.websocket.WebSocketHandler;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -164,7 +165,20 @@ public class Client {
 
     }
 
-    private String redraw() throws ResponseException {
+    public void notifyUser(ServerMessage message) {
+        System.out.print(SET_TEXT_COLOR_BLUE + message.getMessage());
+    }
+
+    public void notifyError(ServerMessage message) {
+        System.out.print(SET_TEXT_COLOR_RED + message.getMessage());
+    }
+
+    public void loadGame(ServerMessage message) {
+        board = message.getGame().getBoard();
+        System.out.print(redraw());
+    }
+
+    private String redraw() {
         if (isObserver || teamColor == ChessGame.TeamColor.WHITE) {
             return printGame(board, ChessGame.TeamColor.WHITE);
         }

@@ -45,7 +45,7 @@ public class Repl implements ServerMessageHandler {
             client.notifyError(message);
         }
         else {
-            client.notifyUsers(message);
+            client.notifyUser(message);
         }
     }
 
