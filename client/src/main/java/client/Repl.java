@@ -1,15 +1,18 @@
 package client;
 
+import client.websocket.ServerMessageHandler;
+import websocket.messages.ServerMessage;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 
-public class Repl {
+public class Repl implements ServerMessageHandler {
     private final Client client;
 
     public Repl(int serverUrl) {
-        client = new Client(serverUrl);
+        client = new Client(serverUrl, this);
     }
 
     public void run() {
@@ -32,6 +35,18 @@ public class Repl {
             }
         }
         System.out.println();
+    }
+
+    public void notify(ServerMessage message) {
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            client.loadGame(message);
+        }
+        else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            client.notifyError(message);
+        }
+        else {
+            client.notifyUsers(message);
+        }
     }
 
     private void printPrompt() {

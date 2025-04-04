@@ -4,9 +4,11 @@ import dataaccess.*;
 import dataaccess.mysql.MySqlAuthDataAccess;
 import dataaccess.mysql.MySqlGameDataAccess;
 import dataaccess.mysql.MySqlUserDataAccess;
+import server.websocket.WebSocketHandler;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
+import service.WebSocketService;
 import spark.*;
 import exception.ResponseException;
 
@@ -32,6 +34,11 @@ public class Server {
         UserService userService = new UserService (userDAO, authDAO, gameDAO);
         AuthService authService = new AuthService(authDAO);
         GameService gameService = new GameService(gameDAO, authService);
+
+        // Web socket
+        WebSocketService webSocketService = new WebSocketService(userDAO, authDAO, gameDAO);
+        Spark.webSocket("/ws", webSocketService);
+
 
         // Register your endpoints and handle exceptions here.
         UserHandler userHandler = new UserHandler(userService, authService);
