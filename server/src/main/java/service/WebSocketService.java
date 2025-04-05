@@ -40,4 +40,8 @@ public class WebSocketService {
         }
         return gameData;
     }
+
+    public void saveGameData(GameData gameData) throws DataAccessException {
+        gameDAO.saveGame(gameData);
+    }
 }

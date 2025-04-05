@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import model.GameData;
@@ -35,17 +36,19 @@ public class WebSocketHandler {
 
     private void connect(String authToken, int gameId, Session session) throws IOException {
         try {
+            // Get user's name from auth Token
             String userName = webSocketService.getAuthData(authToken).username();
 
+            // Add auth token to connections to Web socket
             connections.add(authToken, session);
 
-            // Get game and check if user is observer, white, or black and display the message depending on that
+            // Get game and load send a load_game notification to new connection's client
             GameData gameData = webSocketService.getGameData(gameId);
-
             ServerMessage serverMessageNotification;
-            serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, null);
+            serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game(), null, null);
             connections.broadcast(authToken, serverMessageNotification);
 
+            // Check if user is observer, white, or black and display the message depending on that
             String message;
             if (Objects.equals(gameData.whiteUsername(), userName)) {
                 message = String.format("Team white, %s, has joined", userName);
@@ -56,32 +59,48 @@ public class WebSocketHandler {
             else {
                 message = String.format("%s is now observing", userName);
             }
-
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
             connections.broadcast(authToken, serverMessageNotification);
         }
         catch (Exception e) {
-            var message = "Failed to verify auth token";
-            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, message);
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
             connections.broadcast(authToken, serverMessageNotification);
         }
     }
 
     private void makeMove(String authToken, int gameId, ChessMove move) throws IOException {
+        try {
+            // Get user's name with auth token
+            String userName = webSocketService.getAuthData(authToken).username();
 
-        // Get player
+            // Get game data with gameId
+            GameData gameData = webSocketService.getGameData(gameId);
 
-        // Get Game
+            // Make sure the user is a player in the game
+            if (!Objects.equals(gameData.whiteUsername(), userName) && !Objects.equals(gameData.blackUsername(), userName)) {
+                throw new Exception("Invalid command, user is not a player");
+            }
 
-        // Verify player in game and move throw error potentially
+            // Get the game and make the move, this will check for the right team's turn and valid moves
+            ChessGame game = gameData.game();
+            game.makeMove(move);
 
-        // change turn
+            // Save the new game after the move
+            webSocketService.saveGameData(gameData);
 
-        var message = String.format("%s made a move", authToken);
-        var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-        connections.broadcast(authToken, serverMessageNotification);
-        var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, null);
-        connections.broadcast(authToken, serverMessageLoadGame);
+            // Send notification to those connected through web socket
+            var message = String.format("%s made a move", userName);
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
+            connections.broadcast(authToken, serverMessageNotification);
+
+            // Update the game for everyone
+            var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, null, null);
+            connections.broadcast(authToken, serverMessageLoadGame);
+        }
+        catch (Exception e) {
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
+            connections.broadcast(authToken, serverMessageNotification);
+        }
     }
 
     private void resign(String authToken) throws IOException {
