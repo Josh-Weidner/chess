@@ -13,13 +13,9 @@ import model.login.LoginResult;
 import model.register.RegisterRequest;
 import model.register.RegisterResult;
 import exception.ResponseException;
-import server.websocket.WebSocketHandler;
 import websocket.messages.ServerMessage;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -178,7 +174,7 @@ public class Client {
         }
     }
 
-    public void move(String... params) throws ResponseException {
+    public String move(String... params) throws ResponseException {
         if (params.length != 2) {
             throw new ResponseException(400, "Expected: <START_POSITION> <END_POSITION>");
         }
@@ -215,6 +211,8 @@ public class Client {
         }
 
         ws.makeMove(authToken, game.gameID(), move);
+
+        return "You have successfully submitted your move.";
     }
 
     public ChessPosition getPositionFromCoordinate(String coordinate) throws ResponseException {
@@ -268,13 +266,21 @@ public class Client {
         }
     }
 
-    private void resign() {
-        try {
-            ws.resign(authToken, game.gameID());
+    private String moves(String... params) throws ResponseException {
+        if (params.length != 1) {
+            throw new ResponseException(400, "Expected: <POSITION>");
         }
-        catch (Exception e) {
 
-        }
+        ChessPosition position = getPositionFromCoordinate(params[0]);
+
+        Collection<ChessMove> validMoves = game.game().validMoves(position);
+
+        return buildBoardWithValidMoves(position, validMoves);
+    }
+
+    private String resign() throws ResponseException {
+        ws.resign(authToken, game.gameID());
+        return "Successfully submitted resignation";
     }
 
     private ChessGame.TeamColor getTeam() {
@@ -369,6 +375,88 @@ public class Client {
                     if ((i + j) % 2 == 0) {
                         board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
                     } else {
+                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                    }
+                }
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+            }
+
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                    + RESET_BG_COLOR + "\n");
+        }
+        else {
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                    + RESET_BG_COLOR + "\n");
+
+            int rows = matrix.length;
+            int cols = matrix[0].length;
+            int rowNum = 9;
+            for (int i = 0; i < rows; i++) {
+                rowNum = rowNum - 1;
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+                for (int j = 0; j < cols; j++) {
+                    ChessPiece chessPiece = matrix[7 - i][j];
+                    String pieceString = getPieceString(chessPiece);
+                    if ((i + j) % 2 == 0) {
+                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                    } else {
+                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                    }
+                }
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+            }
+
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                    + RESET_BG_COLOR + "\n");
+        }
+        return board.toString();
+    }
+
+    private String buildBoardWithValidMoves(ChessPosition position, Collection<ChessMove> moves) {
+        StringBuilder board = new StringBuilder();
+        board.append(RESET_TEXT_COLOR);
+
+        ChessPiece[][] matrix = game.game().getBoard().chessBoard;
+
+        ChessGame.TeamColor team = getTeam();
+
+        if (team == ChessGame.TeamColor.BLACK) {
+            board.append(SET_BG_COLOR_MAGENTA
+                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                    + RESET_BG_COLOR + "\n");
+
+            int rows = matrix.length;
+            int cols = matrix[0].length;
+            int rowNum = 1;
+            for (int i = 0; i < rows; i++) {
+                rowNum = rowNum + 1;
+                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+                for (int j = 0; j < cols; j++) {
+                    ChessPiece chessPiece = matrix[i][7 - j];
+                    String pieceString = getPieceString(chessPiece);
+                    ChessPosition newPosition = new ChessPosition(i, j);
+                    if (newPosition.equals(position)) {
+                        board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
+                        continue;
+                    }
+                    if ((i + j) % 2 == 0) {
+                        for (ChessMove move : moves) {
+                            if (newPosition.equals(move.getEndPosition())) {
+                                board.append(SET_BG_COLOR_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                break;
+                            }
+                        }
+                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                    } else {
+                        for (ChessMove move : moves) {
+                            if (newPosition.equals(move.getEndPosition())) {
+                                board.append(SET_BG_COLOR_DARK_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                break;
+                            }
+                        }
                         board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
                     }
                 }
