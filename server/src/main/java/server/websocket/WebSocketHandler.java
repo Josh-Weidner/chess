@@ -46,7 +46,7 @@ public class WebSocketHandler {
             GameData gameData = webSocketService.getGameData(gameId);
             ServerMessage serverMessageNotification;
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
-            connections.broadcast(authToken, serverMessageNotification);
+            connections.broadcastToOne(authToken, serverMessageNotification);
 
             // Check if user is observer, white, or black and display the message depending on that
             String message;
@@ -60,11 +60,11 @@ public class WebSocketHandler {
                 message = String.format("%s is now observing", userName);
             }
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcast(authToken, serverMessageNotification);
+            connections.broadcastToAll(serverMessageNotification);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
-            connections.broadcast(authToken, serverMessageNotification);
+            connections.broadcastToOne(authToken, serverMessageNotification);
         }
     }
 
@@ -88,18 +88,18 @@ public class WebSocketHandler {
             // Save the new game after the move
             webSocketService.saveGameData(gameData);
 
+            // Update the game for everyone
+            var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
+            connections.broadcastToAll(serverMessageLoadGame);
+
             // Send notification to those connected through web socket
             var message = String.format("%s made a move", userName);
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcast(authToken, serverMessageNotification);
-
-            // Update the game for everyone
-            var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
-            connections.broadcast(authToken, serverMessageLoadGame);
+            connections.broadcastToAll(serverMessageNotification);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
-            connections.broadcast(authToken, serverMessageNotification);
+            connections.broadcastToOne(authToken, serverMessageNotification);
         }
     }
 
@@ -125,11 +125,11 @@ public class WebSocketHandler {
 
             var message = String.format("Team %s, %s, has resigned", team, userName);
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcast(authToken, serverMessage);
+            connections.broadcastToAll(serverMessage);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
-            connections.broadcast(authToken, serverMessageNotification);
+            connections.broadcastToOne(authToken, serverMessageNotification);
         }
     }
 
@@ -154,11 +154,11 @@ public class WebSocketHandler {
             }
             connections.remove(authToken);
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcast(authToken, serverMessage);
+            connections.broadcastToAll(serverMessage);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
-            connections.broadcast(authToken, serverMessageNotification);
+            connections.broadcastToOne(authToken, serverMessageNotification);
         }
     }
 }
