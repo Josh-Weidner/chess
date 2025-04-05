@@ -279,8 +279,18 @@ public class Client {
     }
 
     private String resign() throws ResponseException {
-        ws.resign(authToken, game.gameID());
-        return "Successfully submitted resignation";
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Are you sure you want to resign? (y/n)");
+        String input = scanner.nextLine().toUpperCase();
+
+        if (input.equals("Y")) {
+            ws.resign(authToken, game.gameID());
+            return "Successfully submitted resignation";
+        }
+        else {
+            return "Keep going, you got this!";
+        }
     }
 
     private ChessGame.TeamColor getTeam() {
