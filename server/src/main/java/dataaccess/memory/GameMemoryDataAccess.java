@@ -26,6 +26,11 @@ public class GameMemoryDataAccess implements GameDAO {
         return id;
     }
 
+    public void saveGame(GameData game) {
+        GameData gameData = getGame(game.gameID());
+        games.replace(game.gameID(), gameData, game);
+    }
+
     public GameData getGame(Integer gameId){
         return games.get(gameId);
     }

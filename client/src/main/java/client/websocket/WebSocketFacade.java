@@ -3,8 +3,6 @@ package client.websocket;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import webSocketMessages.Action;
-import webSocketMessages.Notification;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
