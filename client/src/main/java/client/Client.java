@@ -1,10 +1,9 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 import client.websocket.ServerMessageHandler;
 import client.websocket.WebSocketFacade;
+import model.GameData;
 import model.create.CreateRequest;
 import model.join.JoinRequest;
 import model.list.GameDataModel;
@@ -19,6 +18,8 @@ import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
@@ -36,8 +37,7 @@ public class Client {
     private boolean isLoggedIn = false;
     private boolean isObserver = false;
     private boolean isPlayer = false;
-    private ChessBoard board = null;
-    private ChessGame.TeamColor teamColor = null;
+    private GameData game = null;
 
     public Client(int serverUrl, ServerMessageHandler serverMessageHandler) {
         server = new ServerFacade(serverUrl);
@@ -58,9 +58,9 @@ public class Client {
                 case "list" -> list();
                 case "observe" -> observe(params);
                 case "redraw" -> redraw();
-                case "leave" -> leave(params);
+                case "leave" -> leave();
                 case "move" -> move(params);
-                case "resign" -> resign(params);
+                case "resign" -> resign();
                 case "moves" -> moves(params);
                 case "logout" -> logout();
                 case "quit" -> "quit";
@@ -165,6 +165,85 @@ public class Client {
 
     }
 
+    public String leave() throws ResponseException {
+        ws.leaveGame(authToken, game.gameID());
+
+        if (isObserver) {
+            isObserver = false;
+            return String.format("You have stopped observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n");
+        }
+        else {
+            isPlayer = false;
+            return String.format("You have stopped playing game: " + SET_TEXT_BOLD + game.gameName() + "\n");
+        }
+    }
+
+    public void move(String... params) throws ResponseException {
+        if (params.length != 2) {
+            throw new ResponseException(400, "Expected: <START_POSITION> <END_POSITION>");
+        }
+
+        if (params[0].length() != 2 || params[1].length() != 2) {
+            throw new ResponseException(400, "Expected: <START_POSITION> <END_POSITION>");
+        }
+
+        ChessPosition startPosition = getPositionFromCoordinate(params[0]);
+        ChessPiece startPiece = game.game().getBoard().getPiece(startPosition);
+        ChessPosition endPosition = getPositionFromCoordinate(params[1]);
+
+        ChessMove move;
+
+        if (startPiece != null && startPiece.getPieceType() == ChessPiece.PieceType.PAWN && (endPosition.getRow() == 0 || endPosition.getRow() == 7)) {
+            Scanner scanner = new Scanner(System.in);
+
+            System.out.print("To what piece would you like to promote your pawn?");
+            String input = scanner.nextLine().toUpperCase();
+
+            ChessPiece.PieceType promotePieceType = switch (input) {
+                case "PAWN" -> ChessPiece.PieceType.PAWN;
+                case "KNIGHT" -> ChessPiece.PieceType.KNIGHT;
+                case "BISHOP" -> ChessPiece.PieceType.BISHOP;
+                case "ROOK" -> ChessPiece.PieceType.ROOK;
+                case "KING" -> ChessPiece.PieceType.KING;
+                default -> ChessPiece.PieceType.QUEEN;
+            };
+
+            move = new ChessMove(startPosition, endPosition, promotePieceType);
+        }
+        else {
+            move = new ChessMove(startPosition, endPosition, null);
+        }
+
+        ws.makeMove(authToken, game.gameID(), move);
+    }
+
+    public ChessPosition getPositionFromCoordinate(String coordinate) throws ResponseException {
+        var first = switch (coordinate.charAt(0)) {
+            case '1' -> 0;
+            case '2' -> 1;
+            case '3' -> 2;
+            case '4' -> 3;
+            case '5' -> 4;
+            case '6' -> 5;
+            case '7' -> 6;
+            case '8' -> 7;
+            default -> throw new ResponseException(400, "Start and end position must be in form of row letter and column number. i.e. e4");
+        };
+        var second = switch (coordinate.charAt(0)) {
+            case 'h' -> 0;
+            case 'g' -> 1;
+            case 'f' -> 2;
+            case 'e' -> 3;
+            case 'd' -> 4;
+            case 'c' -> 5;
+            case 'b' -> 6;
+            case 'a' -> 7;
+            default -> throw new ResponseException(400, "Start and end position must be in form of row letter and column number. i.e. e4");
+        };
+
+        return new ChessPosition(first, second);
+    }
+
     public void notifyUser(ServerMessage message) {
         System.out.print(SET_TEXT_COLOR_BLUE + message.getMessage());
     }
@@ -174,16 +253,36 @@ public class Client {
     }
 
     public void loadGame(ServerMessage message) {
-        board = message.getGame().getBoard();
+        game = message.getGame();
         System.out.print(redraw());
     }
 
     private String redraw() {
-        if (isObserver || teamColor == ChessGame.TeamColor.WHITE) {
+        ChessGame.TeamColor team = getTeam();
+        var board = game.game().getBoard();
+        if (isObserver || team == ChessGame.TeamColor.WHITE) {
             return printGame(board, ChessGame.TeamColor.WHITE);
         }
         else {
             return printGame(board, ChessGame.TeamColor.BLACK);
+        }
+    }
+
+    private void resign() {
+        try {
+            ws.resign(authToken, game.gameID());
+        }
+        catch (Exception e) {
+
+        }
+    }
+
+    private ChessGame.TeamColor getTeam() {
+        if (game != null && Objects.equals(game.whiteUsername(), username)) {
+            return ChessGame.TeamColor.WHITE;
+        }
+        else {
+            return ChessGame.TeamColor.BLACK;
         }
     }
 
@@ -224,7 +323,7 @@ public class Client {
         else if (isPlayer) {
             builder.append(SET_TEXT_COLOR_MAGENTA + "    redraw" + RESET_TEXT_COLOR + " - chess board \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    leave" + RESET_TEXT_COLOR + " - game \n");
-            builder.append(SET_TEXT_COLOR_MAGENTA + "    move <START_POSITION> <END_POSITION>" + RESET_TEXT_COLOR + " - make a move \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    move <START_POSITION> <END_POSITION>" + RESET_TEXT_COLOR + " - make a move. i.e. move e4 d5 \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    resign" + RESET_TEXT_COLOR + " - accept the L \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    moves <POSITION>" + RESET_TEXT_COLOR + " - shows possible moves \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");

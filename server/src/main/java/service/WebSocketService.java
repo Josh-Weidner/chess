@@ -7,12 +7,6 @@ import dataaccess.UserDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-import model.UserData;
-import model.login.LoginRequest;
-import model.login.LoginResult;
-import model.register.RegisterRequest;
-import model.register.RegisterResult;
-import org.mindrot.jbcrypt.BCrypt;
 
 public class WebSocketService {
     private final UserDAO userDAO;

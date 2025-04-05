@@ -45,7 +45,7 @@ public class WebSocketHandler {
             // Get game and load send a load_game notification to new connection's client
             GameData gameData = webSocketService.getGameData(gameId);
             ServerMessage serverMessageNotification;
-            serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game(), null, null);
+            serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
             connections.broadcast(authToken, serverMessageNotification);
 
             // Check if user is observer, white, or black and display the message depending on that
@@ -94,7 +94,7 @@ public class WebSocketHandler {
             connections.broadcast(authToken, serverMessageNotification);
 
             // Update the game for everyone
-            var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, null, null);
+            var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
             connections.broadcast(authToken, serverMessageLoadGame);
         }
         catch (Exception e) {
