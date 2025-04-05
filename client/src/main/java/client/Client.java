@@ -481,9 +481,26 @@ public class Client {
                 for (int j = 0; j < cols; j++) {
                     ChessPiece chessPiece = matrix[7 - i][j];
                     String pieceString = getPieceString(chessPiece);
+                    ChessPosition newPosition = new ChessPosition(i, j);
+                    if (newPosition.equals(position)) {
+                        board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
+                        continue;
+                    }
                     if ((i + j) % 2 == 0) {
+                        for (ChessMove move : moves) {
+                            if (newPosition.equals(move.getEndPosition())) {
+                                board.append(SET_BG_COLOR_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                break;
+                            }
+                        }
                         board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
                     } else {
+                        for (ChessMove move : moves) {
+                            if (newPosition.equals(move.getEndPosition())) {
+                                board.append(SET_BG_COLOR_DARK_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                break;
+                            }
+                        }
                         board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
                     }
                 }
