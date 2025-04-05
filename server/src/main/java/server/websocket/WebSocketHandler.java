@@ -29,7 +29,7 @@ public class WebSocketHandler {
         switch (command.getCommandType()) {
             case CONNECT -> connect(command.getAuthToken(), command.getGameID(), session);
             case MAKE_MOVE -> makeMove(command.getAuthToken(), command.getGameID(), command.getMove());
-            case RESIGN -> resign(command.getAuthToken());
+            case RESIGN -> resign(command.getAuthToken(), command.getGameID());
             case LEAVE -> leave(command.getAuthToken(), command.getGameID());
         }
     }
@@ -103,26 +103,62 @@ public class WebSocketHandler {
         }
     }
 
-    private void resign(String authToken) throws IOException {
-        // Get player
+    private void resign(String authToken, int gameId) throws IOException {
+        try {
+            // Get user's name with auth Token
+            String userName = webSocketService.getAuthData(authToken).username();
 
-        // don't change team turn so the opponent cant move or make it null????
+            // Get game data with gameId
+            GameData gameData = webSocketService.getGameData(gameId);
+            
+            // Get team that is resigning
+            String team;
+            if (!Objects.equals(gameData.blackUsername(), userName)) {
+                team = "black";
+            }
+            else if (!Objects.equals(gameData.whiteUsername(), userName)) {
+                team = "white";
+            }
+            else {
+                throw new Exception("Invalid command, user is not a player");
+            }
 
-        var message = String.format("%s has resigned", authToken);
-        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-        connections.broadcast(authToken, serverMessage);
+            var message = String.format("Team %s, %s, has resigned", team, userName);
+            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
+            connections.broadcast(authToken, serverMessage);
+        }
+        catch (Exception e) {
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
+            connections.broadcast(authToken, serverMessageNotification);
+        }
     }
 
     private void leave(String authToken, int gameId) throws IOException {
-        // Get player and remove
+        try {
+            // Get player and remove
+            String userName = webSocketService.getAuthData(authToken).username();
 
-        // Get game and see who is leaving
+            // Get game and see who is leaving
+            GameData gameData = webSocketService.getGameData(gameId);
 
-        connections.remove(authToken);
-
-        // If observer, white, or black display the message
-        var message = String.format("%s left the game", authToken);
-        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-        connections.broadcast(authToken, serverMessage);
+            // Depending on type of user, display message to user
+            String message;
+            if (Objects.equals(gameData.whiteUsername(), userName)) {
+                message = String.format("Team white, %s, has left the game", userName);
+            }
+            else if (Objects.equals(gameData.blackUsername(), userName)) {
+                message = String.format("Team black, %s, has left the game", userName);
+            }
+            else {
+                message = String.format("%s has stopped observing", userName);
+            }
+            connections.remove(authToken);
+            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
+            connections.broadcast(authToken, serverMessage);
+        }
+        catch (Exception e) {
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
+            connections.broadcast(authToken, serverMessageNotification);
+        }
     }
 }
