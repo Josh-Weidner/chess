@@ -143,8 +143,7 @@ public class Client {
 
         isPlayer = true;
 
-        return "You have joined the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
-                printGame(new ChessBoard(), teamColor);
+        return "You have joined the game: " + SET_TEXT_BOLD + game.gameName() + "\n";
     }
 
     private String observe(String... params) throws ResponseException {
@@ -221,26 +220,26 @@ public class Client {
     }
 
     public ChessPosition getPositionFromCoordinate(String coordinate) throws ResponseException {
-        var first = switch (coordinate.charAt(0)) {
-            case '1' -> 0;
-            case '2' -> 1;
-            case '3' -> 2;
-            case '4' -> 3;
-            case '5' -> 4;
-            case '6' -> 5;
-            case '7' -> 6;
-            case '8' -> 7;
+        var first = switch (coordinate.charAt(1)) {
+            case '1' -> 1;
+            case '2' -> 2;
+            case '3' -> 3;
+            case '4' -> 4;
+            case '5' -> 5;
+            case '6' -> 6;
+            case '7' -> 7;
+            case '8' -> 8;
             default -> throw new ResponseException(400, "Start and end position must be in form of row letter and column number. i.e. e4");
         };
         var second = switch (coordinate.charAt(0)) {
-            case 'h' -> 0;
-            case 'g' -> 1;
-            case 'f' -> 2;
-            case 'e' -> 3;
+            case 'h' -> 8;
+            case 'g' -> 7;
+            case 'f' -> 6;
+            case 'e' -> 5;
             case 'd' -> 4;
-            case 'c' -> 5;
-            case 'b' -> 6;
-            case 'a' -> 7;
+            case 'c' -> 3;
+            case 'b' -> 2;
+            case 'a' -> 1;
             default -> throw new ResponseException(400, "Start and end position must be in form of row letter and column number. i.e. e4");
         };
 
@@ -264,10 +263,10 @@ public class Client {
         ChessGame.TeamColor team = getTeam();
         var board = game.game().getBoard();
         if (isObserver || team == ChessGame.TeamColor.WHITE) {
-            return printGame(board, ChessGame.TeamColor.WHITE);
+            return "\n" + printGame(board, ChessGame.TeamColor.WHITE);
         }
         else {
-            return printGame(board, ChessGame.TeamColor.BLACK);
+            return "\n" + printGame(board, ChessGame.TeamColor.BLACK);
         }
     }
 
@@ -277,6 +276,10 @@ public class Client {
         }
 
         ChessPosition position = getPositionFromCoordinate(params[0]);
+
+        ChessPiece piece = game.game().getBoard().getPiece(position);
+
+        ChessBoard board = game.game().getBoard();
 
         Collection<ChessMove> validMoves = game.game().validMoves(position);
 
@@ -458,21 +461,29 @@ public class Client {
                         continue;
                     }
                     if ((i + j) % 2 == 0) {
+                        boolean matched = false;
                         for (ChessMove move : moves) {
                             if (newPosition.equals(move.getEndPosition())) {
                                 board.append(SET_BG_COLOR_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                matched = true;
                                 break;
                             }
                         }
-                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                        if (!matched) {
+                            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                        }
                     } else {
+                        boolean matched = false;
                         for (ChessMove move : moves) {
                             if (newPosition.equals(move.getEndPosition())) {
                                 board.append(SET_BG_COLOR_DARK_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                matched = true;
                                 break;
                             }
                         }
-                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                        if (!matched) {
+                            board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                        }
                     }
                 }
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
