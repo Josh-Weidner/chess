@@ -138,6 +138,11 @@ public class Client {
 
         server.joinGame(new JoinRequest(teamColor, game.gameID()), authToken);
 
+        ws = new WebSocketFacade(serverUrl, serverMessageHandler);
+        ws.connectToGame(authToken, game.gameID());
+
+        isPlayer = true;
+
         return "You have joined the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
                 printGame(new ChessBoard(), teamColor);
     }
