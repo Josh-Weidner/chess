@@ -513,21 +513,29 @@ public class Client {
                         continue;
                     }
                     if ((i + j) % 2 == 0) {
+                        boolean matched = false;
                         for (ChessMove move : moves) {
                             if (newPosition.equals(move.getEndPosition())) {
                                 board.append(SET_BG_COLOR_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                matched = true;
                                 break;
                             }
                         }
-                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                        if (!matched) {
+                            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                        }
                     } else {
+                        boolean matched = false;
                         for (ChessMove move : moves) {
                             if (newPosition.equals(move.getEndPosition())) {
                                 board.append(SET_BG_COLOR_DARK_GREEN).append(pieceString).append(RESET_BG_COLOR);
+                                matched = true;
                                 break;
                             }
                         }
-                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                        if (!matched) {
+                            board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                        }
                     }
                 }
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
