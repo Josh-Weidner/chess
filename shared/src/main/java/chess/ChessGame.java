@@ -13,6 +13,7 @@ public class ChessGame {
 
     private TeamColor teamTurn;
     private ChessBoard chessBoard;
+    private boolean gameOver = false;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
@@ -35,6 +36,10 @@ public class ChessGame {
     public void setTeamTurn(TeamColor team) {
         teamTurn = team;
     }
+
+    public void setGameOver() {gameOver = true; }
+
+    public boolean isGameOver() { return gameOver; }
 
     /**
      * Enum identifying the 2 possible teams in a chess game

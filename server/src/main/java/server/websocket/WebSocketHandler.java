@@ -3,7 +3,9 @@ package server.websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
+import exception.ResponseException;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -29,19 +31,19 @@ public class WebSocketHandler {
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         switch (command.getCommandType()) {
             case CONNECT -> connect(command.getAuthToken(), command.getGameID(), session);
-            case MAKE_MOVE -> makeMove(command.getAuthToken(), command.getGameID(), command.getMove());
-            case RESIGN -> resign(command.getAuthToken(), command.getGameID());
+            case MAKE_MOVE -> makeMove(command.getAuthToken(), command.getGameID(), command.getMove(), session);
+            case RESIGN -> resign(command.getAuthToken(), command.getGameID(), session);
             case LEAVE -> leave(command.getAuthToken(), command.getGameID());
         }
     }
 
     private void connect(String authToken, int gameId, Session session) throws IOException {
         try {
-            // Add auth token to connections to Web socket
-            connections.add(authToken, session);
-
             // Get user's name from auth Token
             String userName = webSocketService.getAuthData(authToken).username();
+
+            // Add auth token to connections to Web socket
+            connections.add(authToken, session);
 
             // Get game and load send a load_game notification to new connection's client
             GameData gameData = webSocketService.getGameData(gameId);
@@ -67,17 +69,22 @@ public class WebSocketHandler {
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
-            connections.broadcastToOne(authToken, serverMessageNotification);
+            sendError(session, serverMessageNotification);
         }
     }
 
-    private void makeMove(String authToken, int gameId, ChessMove move) throws IOException {
+    private void makeMove(String authToken, int gameId, ChessMove move, Session session) throws IOException {
         try {
             // Get user's name with auth token
             String userName = webSocketService.getAuthData(authToken).username();
 
             // Get game data with gameId
             GameData gameData = webSocketService.getGameData(gameId);
+
+            // Check if game is over
+            if (gameData.game().isGameOver()) {
+                throw new Exception("Game is over");
+            }
 
             // Make sure the user is a player in the game
             if (!Objects.equals(gameData.whiteUsername(), userName) && !Objects.equals(gameData.blackUsername(), userName)) {
@@ -110,43 +117,75 @@ public class WebSocketHandler {
             if (connections.connections.size() == 1) { return; }
 
             // Send notification to those connected through web socket
-            var message = String.format("%s made a move", userName);
+            var message = String.format("Team %s, %s, moved from %s to %s", teamColor, userName,
+                    getCoordinateFromPosition(move.getStartPosition()), getCoordinateFromPosition(move.getEndPosition()));
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
             connections.broadcastAndExcludeOne(authToken, serverMessageNotification);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
-            connections.broadcastToOne(authToken, serverMessageNotification);
+            sendError(session, serverMessageNotification);
         }
     }
 
-    private void resign(String authToken, int gameId) throws IOException {
+    private void sendError(Session session, ServerMessage serverMessageNotification) throws IOException {
+        var json = new Gson().toJson(serverMessageNotification);
+        session.getRemote().sendString(json);
+    }
+
+    private ChessPosition getCoordinateFromPosition(ChessPosition position) throws ResponseException {
+        int first = position.getRow();
+        int column = position.getColumn();
+        var second = switch (column) {
+            case 8 -> 'h';
+            case 7 -> 'g';
+            case 6 -> 'f';
+            case 5 -> 'e';
+            case 4 -> 'd';
+            case 3 -> 'c';
+            case 2 -> 'b';
+            case 1 -> 'a';
+            default -> throw new ResponseException(400, "Start and end position must be in form of row letter and column number. i.e. e4");
+        };
+
+        return new ChessPosition(first, second);
+    }
+
+    private void resign(String authToken, int gameId, Session session) throws IOException {
         try {
             // Get user's name with auth Token
             String userName = webSocketService.getAuthData(authToken).username();
 
             // Get game data with gameId
             GameData gameData = webSocketService.getGameData(gameId);
+
+            // Check if game is already over
+            if (gameData.game().isGameOver()) {
+                throw new Exception("Game is over");
+            }
             
             // Get team that is resigning
             String team;
-            if (!Objects.equals(gameData.blackUsername(), userName)) {
+            if (Objects.equals(gameData.blackUsername(), userName)) {
                 team = "black";
             }
-            else if (!Objects.equals(gameData.whiteUsername(), userName)) {
+            else if (Objects.equals(gameData.whiteUsername(), userName)) {
                 team = "white";
             }
             else {
                 throw new Exception("Invalid command, user is not a player");
             }
 
+            gameData.game().setGameOver();
+            webSocketService.saveGameData(gameData);
+
             var message = String.format("Team %s, %s, has resigned", team, userName);
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
             connections.broadcastToAll(serverMessage);
         }
         catch (Exception e) {
-            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
-            connections.broadcastToOne(authToken, serverMessageNotification);
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
+            sendError(session, serverMessageNotification);
         }
     }
 
@@ -162,9 +201,13 @@ public class WebSocketHandler {
             String message;
             if (Objects.equals(gameData.whiteUsername(), userName)) {
                 message = String.format("Team white, %s, has left the game", userName);
+                GameData newGameData = gameData.withWhiteUsername(null);
+                webSocketService.saveGameData(newGameData);
             }
             else if (Objects.equals(gameData.blackUsername(), userName)) {
                 message = String.format("Team black, %s, has left the game", userName);
+                GameData newGameData = gameData.withBlackUsername(null);
+                webSocketService.saveGameData(newGameData);
             }
             else {
                 message = String.format("%s has stopped observing", userName);

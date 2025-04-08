@@ -13,6 +13,7 @@ import model.list.GameDataModel;
 import model.list.ListResult;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class GameService {
     private final GameDAO gameDAO;
@@ -49,6 +50,14 @@ public class GameService {
 
         // if game is not found in database error will be thrown
         GameData gameData = gameDAO.getGame(joinRequest.gameID());
+
+        // if the user has already joined before and want to join again we don't make any changes to the game
+        if (Objects.equals(authData.username(), gameData.blackUsername())) {
+            return;
+        }
+        else if (Objects.equals(authData.username(), gameData.whiteUsername())) {
+            return;
+        }
 
         // check if the corresponding team is occupied
         if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null) ||
