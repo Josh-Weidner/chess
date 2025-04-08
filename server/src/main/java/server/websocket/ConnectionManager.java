@@ -25,7 +25,7 @@ public class ConnectionManager {
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.authToken.equals(excludeAuthToken)) {
-                    c.send(message.toString());
+                    c.send(new Gson().toJson(message));
                 }
             } else {
                 removeList.add(c);
@@ -61,7 +61,7 @@ public class ConnectionManager {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                c.send(message.toString());
+                c.send(new Gson().toJson(message));
             } else {
                 removeList.add(c);
             }

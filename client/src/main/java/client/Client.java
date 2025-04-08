@@ -160,8 +160,7 @@ public class Client {
         ws.connectToGame(authToken, game.gameID());
         isObserver = true;
 
-        return "You are now observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n" +
-                printGame(new ChessBoard(), ChessGame.TeamColor.WHITE);
+        return "You are now observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n";
 
     }
 
