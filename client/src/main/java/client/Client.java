@@ -383,7 +383,7 @@ public class Client {
 
             int rows = matrix.length;
             int cols = matrix[0].length;
-            int rowNum = 1;
+            int rowNum = 0;
             for (int i = 0; i < rows; i++) {
                 rowNum = rowNum + 1;
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
@@ -448,14 +448,14 @@ public class Client {
 
             int rows = matrix.length;
             int cols = matrix[0].length;
-            int rowNum = 1;
+            int rowNum = 0;
             for (int i = 0; i < rows; i++) {
                 rowNum = rowNum + 1;
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
                 for (int j = 0; j < cols; j++) {
                     ChessPiece chessPiece = matrix[i][7 - j];
                     String pieceString = getPieceString(chessPiece);
-                    ChessPosition newPosition = new ChessPosition(i, j);
+                    ChessPosition newPosition = new ChessPosition(i+1, 8-j);
                     if (newPosition.equals(position)) {
                         board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
                         continue;
@@ -507,7 +507,7 @@ public class Client {
                 for (int j = 0; j < cols; j++) {
                     ChessPiece chessPiece = matrix[7 - i][j];
                     String pieceString = getPieceString(chessPiece);
-                    ChessPosition newPosition = new ChessPosition(i, j);
+                    ChessPosition newPosition = new ChessPosition(8 - i, j+1);
                     if (newPosition.equals(position)) {
                         board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
                         continue;
