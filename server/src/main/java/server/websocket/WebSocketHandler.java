@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -36,17 +37,19 @@ public class WebSocketHandler {
 
     private void connect(String authToken, int gameId, Session session) throws IOException {
         try {
-            // Get user's name from auth Token
-            String userName = webSocketService.getAuthData(authToken).username();
-
             // Add auth token to connections to Web socket
             connections.add(authToken, session);
+
+            // Get user's name from auth Token
+            String userName = webSocketService.getAuthData(authToken).username();
 
             // Get game and load send a load_game notification to new connection's client
             GameData gameData = webSocketService.getGameData(gameId);
             ServerMessage serverMessageNotification;
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
             connections.broadcastToOne(authToken, serverMessageNotification);
+
+            if (connections.connections.size() == 1) { return; }
 
             // Check if user is observer, white, or black and display the message depending on that
             String message;
@@ -60,10 +63,10 @@ public class WebSocketHandler {
                 message = String.format("%s is now observing", userName);
             }
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastToAll(serverMessageNotification);
+            connections.broadcastAndExcludeOne(authToken, serverMessageNotification);
         }
         catch (Exception e) {
-            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
             connections.broadcastToOne(authToken, serverMessageNotification);
         }
     }
@@ -81,6 +84,18 @@ public class WebSocketHandler {
                 throw new Exception("Invalid command, user is not a player");
             }
 
+            // Get usernames team color
+            ChessGame.TeamColor teamColor = ChessGame.TeamColor.BLACK;
+            if (gameData.whiteUsername().equals(userName)) {
+                teamColor = ChessGame.TeamColor.WHITE;
+            }
+
+            // Make sure the piece that was passed in corresponds to the player that sent it
+            ChessPiece piece = gameData.game().getBoard().getPiece(move.getStartPosition());
+            if (piece == null || !piece.getTeamColor().equals(gameData.game().getTeamTurn()) || !piece.getTeamColor().equals(teamColor)) {
+                throw new Exception("Invalid move, not player's turn");
+            }
+
             // Get the game and make the move, this will check for the right team's turn and valid moves
             ChessGame game = gameData.game();
             game.makeMove(move);
@@ -92,13 +107,15 @@ public class WebSocketHandler {
             var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
             connections.broadcastToAll(serverMessageLoadGame);
 
+            if (connections.connections.size() == 1) { return; }
+
             // Send notification to those connected through web socket
             var message = String.format("%s made a move", userName);
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastToAll(serverMessageNotification);
+            connections.broadcastAndExcludeOne(authToken, serverMessageNotification);
         }
         catch (Exception e) {
-            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
             connections.broadcastToOne(authToken, serverMessageNotification);
         }
     }
