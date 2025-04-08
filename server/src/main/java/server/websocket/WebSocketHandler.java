@@ -43,13 +43,13 @@ public class WebSocketHandler {
             String userName = webSocketService.getAuthData(authToken).username();
 
             // Add auth token to connections to Web socket
-            connections.add(authToken, session);
+            connections.add(gameId, authToken, session);
 
             // Get game and load send a load_game notification to new connection's client
             GameData gameData = webSocketService.getGameData(gameId);
             ServerMessage serverMessageNotification;
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
-            connections.broadcastToOne(authToken, serverMessageNotification);
+            connections.broadcastToOne(gameId, authToken, serverMessageNotification);
 
             if (connections.connections.size() == 1) { return; }
 
@@ -65,7 +65,7 @@ public class WebSocketHandler {
                 message = String.format("%s is now observing", userName);
             }
             serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastAndExcludeOne(authToken, serverMessageNotification);
+            connections.broadcastAndExcludeOne(gameId, authToken, serverMessageNotification);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
@@ -112,7 +112,7 @@ public class WebSocketHandler {
 
             // Update the game for everyone
             var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
-            connections.broadcastToAll(serverMessageLoadGame);
+            connections.broadcastToAll(gameId, serverMessageLoadGame);
 
             if (connections.connections.size() == 1) { return; }
 
@@ -120,7 +120,7 @@ public class WebSocketHandler {
             var message = String.format("Team %s, %s, moved from %s to %s", teamColor, userName,
                     getCoordinateFromPosition(move.getStartPosition()), getCoordinateFromPosition(move.getEndPosition()));
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastAndExcludeOne(authToken, serverMessageNotification);
+            connections.broadcastAndExcludeOne(gameId, authToken, serverMessageNotification);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
@@ -181,7 +181,7 @@ public class WebSocketHandler {
 
             var message = String.format("Team %s, %s, has resigned", team, userName);
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastToAll(serverMessage);
+            connections.broadcastToAll(gameId, serverMessage);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
@@ -212,13 +212,13 @@ public class WebSocketHandler {
             else {
                 message = String.format("%s has stopped observing", userName);
             }
-            connections.remove(authToken);
+            connections.remove(gameId, authToken);
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastToAll(serverMessage);
+            connections.broadcastToAll(gameId, serverMessage);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, null, e.getMessage());
-            connections.broadcastToOne(authToken, serverMessageNotification);
+            connections.broadcastToOne(gameId, authToken, serverMessageNotification);
         }
     }
 }
