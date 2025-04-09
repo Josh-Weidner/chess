@@ -277,10 +277,6 @@ public class Client {
 
         ChessPosition position = getPositionFromCoordinate(params[0]);
 
-        ChessPiece piece = game.game().getBoard().getPiece(position);
-
-        ChessBoard board = game.game().getBoard();
-
         Collection<ChessMove> validMoves = game.game().validMoves(position);
 
         return buildBoardWithValidMoves(position, validMoves);
@@ -378,60 +374,68 @@ public class Client {
         ChessPiece[][] matrix = game.chessBoard;
 
         if (team == ChessGame.TeamColor.BLACK) {
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
-                    + RESET_BG_COLOR + "\n");
-
-            int rows = matrix.length;
-            int cols = matrix[0].length;
-            int rowNum = 0;
-            for (int i = 0; i < rows; i++) {
-                rowNum = rowNum + 1;
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-                for (int j = 0; j < cols; j++) {
-                    ChessPiece chessPiece = matrix[i][7 - j];
-                    String pieceString = getPieceString(chessPiece);
-                    if ((i + j) % 2 == 0) {
-                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
-                    } else {
-                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
-                    }
-                }
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
-            }
-
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
-                    + RESET_BG_COLOR + "\n");
+            buildBlackBoard(board, matrix);
         }
         else {
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
-                    + RESET_BG_COLOR + "\n");
-
-            int rows = matrix.length;
-            int cols = matrix[0].length;
-            int rowNum = 9;
-            for (int i = 0; i < rows; i++) {
-                rowNum = rowNum - 1;
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-                for (int j = 0; j < cols; j++) {
-                    ChessPiece chessPiece = matrix[7 - i][j];
-                    String pieceString = getPieceString(chessPiece);
-                    if ((i + j) % 2 == 0) {
-                        board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
-                    } else {
-                        board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
-                    }
-                }
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
-            }
-
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
-                    + RESET_BG_COLOR + "\n");
+            buildWhiteBoard(board, matrix);
         }
         return board.toString();
+    }
+
+    private void buildBlackBoard(StringBuilder board, ChessPiece[][] matrix) {
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                + RESET_BG_COLOR + "\n");
+
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int rowNum = 0;
+        for (int i = 0; i < rows; i++) {
+            rowNum = rowNum + 1;
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+            for (int j = 0; j < cols; j++) {
+                ChessPiece chessPiece = matrix[i][7 - j];
+                String pieceString = getPieceString(chessPiece);
+                if ((i + j) % 2 == 0) {
+                    board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                } else {
+                    board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                }
+            }
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+        }
+
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                + RESET_BG_COLOR + "\n");
+    }
+
+    private void buildWhiteBoard(StringBuilder board, ChessPiece[][] matrix) {
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                + RESET_BG_COLOR + "\n");
+
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int rowNum = 9;
+        for (int i = 0; i < rows; i++) {
+            rowNum = rowNum - 1;
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+            for (int j = 0; j < cols; j++) {
+                ChessPiece chessPiece = matrix[7 - i][j];
+                String pieceString = getPieceString(chessPiece);
+                if ((i + j) % 2 == 0) {
+                    board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+                } else {
+                    board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
+                }
+            }
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+        }
+
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                + RESET_BG_COLOR + "\n");
     }
 
     private String buildBoardWithValidMoves(ChessPosition position, Collection<ChessMove> moves) {
@@ -443,70 +447,79 @@ public class Client {
         ChessGame.TeamColor team = getTeam();
 
         if (team == ChessGame.TeamColor.BLACK) {
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
-                    + RESET_BG_COLOR + "\n");
-
-            int rows = matrix.length;
-            int cols = matrix[0].length;
-            int rowNum = 0;
-            for (int i = 0; i < rows; i++) {
-                rowNum = rowNum + 1;
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-                for (int j = 0; j < cols; j++) {
-                    ChessPiece chessPiece = matrix[i][7 - j];
-                    String pieceString = getPieceString(chessPiece);
-                    ChessPosition newPosition = new ChessPosition(i+1, 8-j);
-                    getSquare(newPosition, position, board, pieceString, i, j, moves);
-                }
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
-            }
-
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
-                    + RESET_BG_COLOR + "\n");
+            buildBlackBoardWithValidMoves(board, position, moves, matrix);
         }
         else {
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
-                    + RESET_BG_COLOR + "\n");
-
-            int rows = matrix.length;
-            int cols = matrix[0].length;
-            int rowNum = 9;
-            for (int i = 0; i < rows; i++) {
-                rowNum = rowNum - 1;
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-                for (int j = 0; j < cols; j++) {
-                    ChessPiece chessPiece = matrix[7 - i][j];
-                    String pieceString = getPieceString(chessPiece);
-                    ChessPosition newPosition = new ChessPosition(8 - i, j+1);
-                    getSquare(newPosition, position, board, pieceString, i, j, moves);
-                }
-                board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
-            }
-
-            board.append(SET_BG_COLOR_MAGENTA
-                    + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
-                    + RESET_BG_COLOR + "\n");
+            buildWhiteBoardWithValidMoves(board, position, moves, matrix);
         }
         return board.toString();
     }
 
-    private void getSquare(ChessPosition newPosition, ChessPosition position, StringBuilder board,
-                           String pieceString, int i, int j, Collection<ChessMove> moves) {
+    private void buildBlackBoardWithValidMoves(StringBuilder board, ChessPosition position, Collection<ChessMove> moves, ChessPiece[][] matrix) {
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                + RESET_BG_COLOR + "\n");
+
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int rowNum = 0;
+        for (int i = 0; i < rows; i++) {
+            rowNum = rowNum + 1;
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+            for (int j = 0; j < cols; j++) {
+                ChessPiece chessPiece = matrix[i][7 - j];
+                String pieceString = getPieceString(chessPiece);
+                ChessPosition newPosition = new ChessPosition(i+1, 8-j);
+                getSquareWithValidMoves(newPosition, position, board, pieceString, i, j, moves);
+            }
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+        }
+
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
+                + RESET_BG_COLOR + "\n");
+    }
+
+    private void buildWhiteBoardWithValidMoves(StringBuilder board, ChessPosition position, Collection<ChessMove> moves, ChessPiece[][] matrix)
+    {
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                + RESET_BG_COLOR + "\n");
+
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int rowNum = 9;
+        for (int i = 0; i < rows; i++) {
+            rowNum = rowNum - 1;
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
+            for (int j = 0; j < cols; j++) {
+                ChessPiece chessPiece = matrix[7 - i][j];
+                String pieceString = getPieceString(chessPiece);
+                ChessPosition newPosition = new ChessPosition(8 - i, j+1);
+                getSquareWithValidMoves(newPosition, position, board, pieceString, i, j, moves);
+            }
+            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
+        }
+
+        board.append(SET_BG_COLOR_MAGENTA
+                + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
+                + RESET_BG_COLOR + "\n");
+    }
+
+    private void getSquareWithValidMoves(ChessPosition newPosition, ChessPosition position, StringBuilder board,
+                                         String pieceString, int i, int j, Collection<ChessMove> moves) {
         if (newPosition.equals(position)) {
             board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
             return;
         }
         if ((i + j) % 2 == 0) {
-            getSquareColor(newPosition, board, pieceString, moves, SET_BG_COLOR_GREEN);
+            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_GREEN);
         } else {
-            getSquareColor(newPosition, board, pieceString, moves, SET_BG_COLOR_DARK_GREEN);
+            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_DARK_GREEN);
         }
     }
 
-    private void getSquareColor(ChessPosition newPosition, StringBuilder board, String pieceString, Collection<ChessMove> moves, String color) {
+    private void getSquareColorWithValidMoves(ChessPosition newPosition, StringBuilder board, String pieceString, Collection<ChessMove> moves, String color) {
         boolean matched = false;
         for (ChessMove move : moves) {
             if (newPosition.equals(move.getEndPosition())) {
