@@ -27,8 +27,8 @@ public class WebSocketService {
         return authData;
     }
 
-    public GameData getGameData(int Id) throws ResponseException, DataAccessException {
-        GameData gameData = gameDAO.getGame(Id);
+    public GameData getGameData(int id) throws ResponseException, DataAccessException {
+        GameData gameData = gameDAO.getGame(id);
         if (gameData == null) {
             throw new ResponseException(401, "Error: Game not found");
         }

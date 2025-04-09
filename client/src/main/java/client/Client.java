@@ -192,7 +192,8 @@ public class Client {
 
         ChessMove move;
 
-        if (startPiece != null && startPiece.getPieceType() == ChessPiece.PieceType.PAWN && (endPosition.getRow() == 0 || endPosition.getRow() == 7)) {
+        if (startPiece != null && startPiece.getPieceType() == ChessPiece.PieceType.PAWN &&
+                (endPosition.getRow() == 0 || endPosition.getRow() == 7)) {
             Scanner scanner = new Scanner(System.in);
 
             System.out.print("To what piece would you like to promote your pawn?");
@@ -346,7 +347,8 @@ public class Client {
         else if (isPlayer) {
             builder.append(SET_TEXT_COLOR_MAGENTA + "    redraw" + RESET_TEXT_COLOR + " - chess board \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    leave" + RESET_TEXT_COLOR + " - game \n");
-            builder.append(SET_TEXT_COLOR_MAGENTA + "    move <START_POSITION> <END_POSITION>" + RESET_TEXT_COLOR + " - make a move. i.e. move e4 d5 \n");
+            builder.append(SET_TEXT_COLOR_MAGENTA + "    move <START_POSITION> <END_POSITION>" +
+                    RESET_TEXT_COLOR + " - make a move. i.e. move e4 d5 \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    resign" + RESET_TEXT_COLOR + " - accept the L \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    moves <POSITION>" + RESET_TEXT_COLOR + " - shows possible moves \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
@@ -455,35 +457,7 @@ public class Client {
                     ChessPiece chessPiece = matrix[i][7 - j];
                     String pieceString = getPieceString(chessPiece);
                     ChessPosition newPosition = new ChessPosition(i+1, 8-j);
-                    if (newPosition.equals(position)) {
-                        board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
-                        continue;
-                    }
-                    if ((i + j) % 2 == 0) {
-                        boolean matched = false;
-                        for (ChessMove move : moves) {
-                            if (newPosition.equals(move.getEndPosition())) {
-                                board.append(SET_BG_COLOR_GREEN).append(pieceString).append(RESET_BG_COLOR);
-                                matched = true;
-                                break;
-                            }
-                        }
-                        if (!matched) {
-                            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
-                        }
-                    } else {
-                        boolean matched = false;
-                        for (ChessMove move : moves) {
-                            if (newPosition.equals(move.getEndPosition())) {
-                                board.append(SET_BG_COLOR_DARK_GREEN).append(pieceString).append(RESET_BG_COLOR);
-                                matched = true;
-                                break;
-                            }
-                        }
-                        if (!matched) {
-                            board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
-                        }
-                    }
+                    getSquare(newPosition, position, board, pieceString, i, j, moves);
                 }
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
             }
@@ -507,35 +481,7 @@ public class Client {
                     ChessPiece chessPiece = matrix[7 - i][j];
                     String pieceString = getPieceString(chessPiece);
                     ChessPosition newPosition = new ChessPosition(8 - i, j+1);
-                    if (newPosition.equals(position)) {
-                        board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
-                        continue;
-                    }
-                    if ((i + j) % 2 == 0) {
-                        boolean matched = false;
-                        for (ChessMove move : moves) {
-                            if (newPosition.equals(move.getEndPosition())) {
-                                board.append(SET_BG_COLOR_GREEN).append(pieceString).append(RESET_BG_COLOR);
-                                matched = true;
-                                break;
-                            }
-                        }
-                        if (!matched) {
-                            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
-                        }
-                    } else {
-                        boolean matched = false;
-                        for (ChessMove move : moves) {
-                            if (newPosition.equals(move.getEndPosition())) {
-                                board.append(SET_BG_COLOR_DARK_GREEN).append(pieceString).append(RESET_BG_COLOR);
-                                matched = true;
-                                break;
-                            }
-                        }
-                        if (!matched) {
-                            board.append(SET_BG_COLOR_BLACK).append(pieceString).append(RESET_BG_COLOR);
-                        }
-                    }
+                    getSquare(newPosition, position, board, pieceString, i, j, moves);
                 }
                 board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
             }
@@ -546,6 +492,34 @@ public class Client {
         }
         return board.toString();
     }
+
+    private void getSquare(ChessPosition newPosition, ChessPosition position, StringBuilder board,
+                           String pieceString, int i, int j, Collection<ChessMove> moves) {
+        if (newPosition.equals(position)) {
+            board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
+            return;
+        }
+        if ((i + j) % 2 == 0) {
+            getSquareColor(newPosition, board, pieceString, moves, SET_BG_COLOR_GREEN);
+        } else {
+            getSquareColor(newPosition, board, pieceString, moves, SET_BG_COLOR_DARK_GREEN);
+        }
+    }
+
+    private void getSquareColor(ChessPosition newPosition, StringBuilder board, String pieceString, Collection<ChessMove> moves, String color) {
+        boolean matched = false;
+        for (ChessMove move : moves) {
+            if (newPosition.equals(move.getEndPosition())) {
+                board.append(color).append(pieceString).append(RESET_BG_COLOR);
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+        }
+    }
+
 
     private String getPieceString(ChessPiece chessPiece) {
         if (chessPiece == null) {
