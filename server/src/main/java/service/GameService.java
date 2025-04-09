@@ -52,10 +52,10 @@ public class GameService {
         GameData gameData = gameDAO.getGame(joinRequest.gameID());
 
         // if the user has already joined before and want to join again we don't make any changes to the game
-        if (Objects.equals(authData.username(), gameData.blackUsername())) {
+        if (Objects.equals(authData.username(), gameData.blackUsername()) && joinRequest.playerColor().equals(ChessGame.TeamColor.BLACK)) {
             return;
         }
-        else if (Objects.equals(authData.username(), gameData.whiteUsername())) {
+        else if (Objects.equals(authData.username(), gameData.whiteUsername()) && joinRequest.playerColor().equals(ChessGame.TeamColor.WHITE)) {
             return;
         }
 

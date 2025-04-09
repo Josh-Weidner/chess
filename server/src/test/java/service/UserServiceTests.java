@@ -118,8 +118,9 @@ public class UserServiceTests {
     @Test
     @Order(11)
     void invalidJoin() {
+        RegisterResult registerResult = assertDoesNotThrow(() -> userService.register(new RegisterRequest("nextUser", "nextUser", "nextUser")));
         ResponseException responseException = assertThrows(ResponseException.class,
-                () -> gameService.joinGame(newAuth,new JoinRequest(ChessGame.TeamColor.WHITE, newGameId)));
+                () -> gameService.joinGame(registerResult.authToken(),new JoinRequest(ChessGame.TeamColor.WHITE, newGameId)));
         assertEquals(403, responseException.statusCode());
         assertEquals("Error: already taken", responseException.getMessage());
     }
