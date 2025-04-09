@@ -30,7 +30,8 @@ public class ValidMoves {
         return board.toString();
     }
 
-    private static void buildBlackBoardWithValidMoves(StringBuilder board, ChessPosition position, Collection<ChessMove> moves, ChessPiece[][] matrix) {
+    private static void buildBlackBoardWithValidMoves(StringBuilder board, ChessPosition position,
+                                                      Collection<ChessMove> moves, ChessPiece[][] matrix) {
         board.append(SET_BG_COLOR_MAGENTA
                 + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
                 + RESET_BG_COLOR + "\n");
