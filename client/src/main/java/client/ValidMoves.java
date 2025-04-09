@@ -89,14 +89,14 @@ public class ValidMoves {
             return;
         }
         if ((i + j) % 2 == 0) {
-            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_GREEN);
+            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_GREEN, SET_BG_COLOR_WHITE);
         } else {
-            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_DARK_GREEN);
+            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_DARK_GREEN, SET_BG_COLOR_BLACK);
         }
     }
 
     private static void getSquareColorWithValidMoves(ChessPosition newPosition, StringBuilder board,
-                                              String pieceString, Collection<ChessMove> moves, String color) {
+                                              String pieceString, Collection<ChessMove> moves, String color, String color1) {
         boolean matched = false;
         for (ChessMove move : moves) {
             if (newPosition.equals(move.getEndPosition())) {
@@ -106,7 +106,7 @@ public class ValidMoves {
             }
         }
         if (!matched) {
-            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
+            board.append(color1).append(pieceString).append(RESET_BG_COLOR);
         }
     }
 }

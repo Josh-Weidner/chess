@@ -47,9 +47,10 @@ public class Repl implements ServerMessageHandler {
         else {
             client.notifyUser(message);
         }
+        printPrompt();
     }
 
-    private void printPrompt() {
+    public static void printPrompt() {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }

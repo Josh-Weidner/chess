@@ -197,14 +197,17 @@ public class WebSocketHandler {
             // Get game and see who is leaving
             GameData gameData = webSocketService.getGameData(gameId);
 
+            // Check if game is over
+            boolean isGameOver = gameData.game().isGameOver();
+
             // Depending on type of user, display message to user
             String message;
-            if (Objects.equals(gameData.whiteUsername(), userName)) {
+            if (Objects.equals(gameData.whiteUsername(), userName) && !isGameOver) {
                 message = String.format("Team white, %s, has left the game", userName);
                 GameData newGameData = gameData.withWhiteUsername(null);
                 webSocketService.saveGameData(newGameData);
             }
-            else if (Objects.equals(gameData.blackUsername(), userName)) {
+            else if (Objects.equals(gameData.blackUsername(), userName) && !isGameOver) {
                 message = String.format("Team black, %s, has left the game", userName);
                 GameData newGameData = gameData.withBlackUsername(null);
                 webSocketService.saveGameData(newGameData);

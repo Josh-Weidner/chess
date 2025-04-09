@@ -169,15 +169,23 @@ public class Client {
 
         if (isObserver) {
             isObserver = false;
-            return String.format("You have stopped observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n");
+            var string = String.format("You have stopped observing the game: " + SET_TEXT_BOLD + game.gameName() + "\n");
+            game = null;
+            return string;
         }
         else {
             isPlayer = false;
-            return String.format("You have stopped playing game: " + SET_TEXT_BOLD + game.gameName() + "\n");
+            var string = String.format("You have stopped playing game: " + SET_TEXT_BOLD + game.gameName() + "\n");
+            game = null;
+            return string;
         }
     }
 
     public String move(String... params) throws ResponseException {
+        if (game.game().isGameOver()) {
+            throw new ResponseException(400, "Game over");
+        }
+
         if (params.length != 2) {
             throw new ResponseException(400, "Expected: <START_POSITION> <END_POSITION>");
         }
@@ -251,7 +259,7 @@ public class Client {
     }
 
     public void notifyError(ServerMessage message) {
-        System.out.print(SET_TEXT_COLOR_RED + message.getMessage());
+        System.out.print(SET_TEXT_COLOR_RED + message.getErrorMessage());
     }
 
     public void loadGame(ServerMessage message) {
@@ -271,6 +279,10 @@ public class Client {
     }
 
     private String moves(String... params) throws ResponseException {
+        if (game.game().isGameOver()) {
+            throw new ResponseException(400, "Game over");
+        }
+
         if (params.length != 1) {
             throw new ResponseException(400, "Expected: <POSITION>");
         }
@@ -283,9 +295,14 @@ public class Client {
     }
 
     private String resign() throws ResponseException {
+        if (game.game().isGameOver()) {
+            throw new ResponseException(400, "Game over");
+        }
+
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Are you sure you want to resign? (y/n)");
+        Repl.printPrompt();
         String input = scanner.nextLine().toUpperCase();
 
         if (input.equals("Y")) {
@@ -328,13 +345,17 @@ public class Client {
 
     public String help() {
         StringBuilder builder = new StringBuilder();
+        var isGameOver = game != null && game.game().isGameOver();
         if (!isLoggedIn) {
             builder.append(SET_TEXT_COLOR_MAGENTA + "    register <USERNAME> <PASSWORD> <EMAIL>" + RESET_TEXT_COLOR + " - to create an account \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    login <USERNAME> <PASSWORD>" + RESET_TEXT_COLOR + " - to play chess \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    help" + RESET_TEXT_COLOR + " - possible commands \n");
         }
-        else if (isObserver) {
+        else if (isObserver || isGameOver) {
+            if (isGameOver) {
+                builder.append(SET_TEXT_COLOR_YELLOW + "    This game has ended" + RESET_TEXT_COLOR + "\n");
+            }
             builder.append(SET_TEXT_COLOR_MAGENTA + "    redraw" + RESET_TEXT_COLOR + " - chess board \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    leave" + RESET_TEXT_COLOR + " - game \n");
             builder.append(SET_TEXT_COLOR_MAGENTA + "    quit" + RESET_TEXT_COLOR + " - exit program \n");
@@ -370,7 +391,6 @@ public class Client {
         StringBuilder board = new StringBuilder();
         board.append(RESET_TEXT_COLOR);
 
-        game.resetBoard();
         ChessPiece[][] matrix = game.chessBoard;
 
         if (team == ChessGame.TeamColor.BLACK) {
