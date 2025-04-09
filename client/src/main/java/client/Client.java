@@ -260,7 +260,7 @@ public class Client {
     }
 
     private String redraw() {
-        ChessGame.TeamColor team = getTeam();
+        ChessGame.TeamColor team = getTeam(game, username);
         var board = game.game().getBoard();
         if (isObserver || team == ChessGame.TeamColor.WHITE) {
             return "\n" + printGame(board, ChessGame.TeamColor.WHITE);
@@ -279,7 +279,7 @@ public class Client {
 
         Collection<ChessMove> validMoves = game.game().validMoves(position);
 
-        return buildBoardWithValidMoves(position, validMoves);
+        return ValidMoves.buildBoardWithValidMoves(game, position, validMoves, username);
     }
 
     private String resign() throws ResponseException {
@@ -297,7 +297,7 @@ public class Client {
         }
     }
 
-    private ChessGame.TeamColor getTeam() {
+    public static ChessGame.TeamColor getTeam(GameData game, String username) {
         if (game != null && Objects.equals(game.whiteUsername(), username)) {
             return ChessGame.TeamColor.WHITE;
         }
@@ -438,103 +438,7 @@ public class Client {
                 + RESET_BG_COLOR + "\n");
     }
 
-    private String buildBoardWithValidMoves(ChessPosition position, Collection<ChessMove> moves) {
-        StringBuilder board = new StringBuilder();
-        board.append(RESET_TEXT_COLOR);
-
-        ChessPiece[][] matrix = game.game().getBoard().chessBoard;
-
-        ChessGame.TeamColor team = getTeam();
-
-        if (team == ChessGame.TeamColor.BLACK) {
-            buildBlackBoardWithValidMoves(board, position, moves, matrix);
-        }
-        else {
-            buildWhiteBoardWithValidMoves(board, position, moves, matrix);
-        }
-        return board.toString();
-    }
-
-    private void buildBlackBoardWithValidMoves(StringBuilder board, ChessPosition position, Collection<ChessMove> moves, ChessPiece[][] matrix) {
-        board.append(SET_BG_COLOR_MAGENTA
-                + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
-                + RESET_BG_COLOR + "\n");
-
-        int rows = matrix.length;
-        int cols = matrix[0].length;
-        int rowNum = 0;
-        for (int i = 0; i < rows; i++) {
-            rowNum = rowNum + 1;
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-            for (int j = 0; j < cols; j++) {
-                ChessPiece chessPiece = matrix[i][7 - j];
-                String pieceString = getPieceString(chessPiece);
-                ChessPosition newPosition = new ChessPosition(i+1, 8-j);
-                getSquareWithValidMoves(newPosition, position, board, pieceString, i, j, moves);
-            }
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
-        }
-
-        board.append(SET_BG_COLOR_MAGENTA
-                + "   " + " h " + " g " + " f " + " e " + " d " + " c " + " b " + " a " + "   "
-                + RESET_BG_COLOR + "\n");
-    }
-
-    private void buildWhiteBoardWithValidMoves(StringBuilder board, ChessPosition position, Collection<ChessMove> moves, ChessPiece[][] matrix)
-    {
-        board.append(SET_BG_COLOR_MAGENTA
-                + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
-                + RESET_BG_COLOR + "\n");
-
-        int rows = matrix.length;
-        int cols = matrix[0].length;
-        int rowNum = 9;
-        for (int i = 0; i < rows; i++) {
-            rowNum = rowNum - 1;
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR);
-            for (int j = 0; j < cols; j++) {
-                ChessPiece chessPiece = matrix[7 - i][j];
-                String pieceString = getPieceString(chessPiece);
-                ChessPosition newPosition = new ChessPosition(8 - i, j+1);
-                getSquareWithValidMoves(newPosition, position, board, pieceString, i, j, moves);
-            }
-            board.append(SET_BG_COLOR_MAGENTA + " ").append(rowNum).append(" ").append(RESET_BG_COLOR).append("\n");
-        }
-
-        board.append(SET_BG_COLOR_MAGENTA
-                + "   " + " a " + " b " + " c " + " d " + " e " + " f " + " g " + " h " + "   "
-                + RESET_BG_COLOR + "\n");
-    }
-
-    private void getSquareWithValidMoves(ChessPosition newPosition, ChessPosition position, StringBuilder board,
-                                         String pieceString, int i, int j, Collection<ChessMove> moves) {
-        if (newPosition.equals(position)) {
-            board.append(SET_BG_COLOR_YELLOW).append(pieceString).append(RESET_BG_COLOR);
-            return;
-        }
-        if ((i + j) % 2 == 0) {
-            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_GREEN);
-        } else {
-            getSquareColorWithValidMoves(newPosition, board, pieceString, moves, SET_BG_COLOR_DARK_GREEN);
-        }
-    }
-
-    private void getSquareColorWithValidMoves(ChessPosition newPosition, StringBuilder board, String pieceString, Collection<ChessMove> moves, String color) {
-        boolean matched = false;
-        for (ChessMove move : moves) {
-            if (newPosition.equals(move.getEndPosition())) {
-                board.append(color).append(pieceString).append(RESET_BG_COLOR);
-                matched = true;
-                break;
-            }
-        }
-        if (!matched) {
-            board.append(SET_BG_COLOR_WHITE).append(pieceString).append(RESET_BG_COLOR);
-        }
-    }
-
-
-    private String getPieceString(ChessPiece chessPiece) {
+    public static String getPieceString(ChessPiece chessPiece) {
         if (chessPiece == null) {
             return "   ";
         }
@@ -552,7 +456,7 @@ public class Client {
         }
     }
 
-    private String getString(ChessPiece chessPiece, String king, String queen, String rook, String bishop, String knight, String pawn) {
+    public static String getString(ChessPiece chessPiece, String king, String queen, String rook, String bishop, String knight, String pawn) {
         return switch (chessPiece.getPieceType()) {
             case KING -> king;
             case QUEEN -> queen;
