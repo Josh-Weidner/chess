@@ -93,8 +93,10 @@ public class WebSocketHandler {
 
             // Get usernames team color
             ChessGame.TeamColor teamColor = ChessGame.TeamColor.BLACK;
+            ChessGame.TeamColor opponentTeamColor = ChessGame.TeamColor.WHITE;
             if (gameData.whiteUsername().equals(userName)) {
                 teamColor = ChessGame.TeamColor.WHITE;
+                opponentTeamColor = ChessGame.TeamColor.BLACK;
             }
 
             // Make sure the piece that was passed in corresponds to the player that sent it
@@ -107,20 +109,40 @@ public class WebSocketHandler {
             ChessGame game = gameData.game();
             game.makeMove(move);
 
+            // Send notification to those connected through web socket
+            var message = String.format("Team %s, %s, moved from %s to %s", teamColor, userName,
+                    getCoordinateFromPosition(move.getStartPosition()), getCoordinateFromPosition(move.getEndPosition()));
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
+            connections.broadcastAndExcludeOne(gameId, authToken, serverMessageNotification);
+
+            // Check for complete game
+            if (game.isInCheck(opponentTeamColor)) {
+                var checkMessage = String.format("Team %s is in check", opponentTeamColor);
+                var checkServerMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        null, null, checkMessage);
+                connections.broadcastToAll(gameId, checkServerMessageNotification);
+            }
+            else if (game.isInCheckmate(teamColor)) {
+                var checkMateMessage = String.format("Team %s is in check mate! %s wins!", opponentTeamColor, teamColor);
+                var checkMateServerMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        null, null, checkMateMessage);
+                game.setGameOver();
+                connections.broadcastToAll(gameId, checkMateServerMessageNotification);
+            }
+            else if (game.isInStalemate(opponentTeamColor)) {
+                var staleMateMessage = "It is a stalemate :(";
+                var staleMateServerMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        null, null, staleMateMessage);
+                game.setGameOver();
+                connections.broadcastToAll(gameId, staleMateServerMessageNotification);
+            }
+
             // Save the new game after the move
             webSocketService.saveGameData(gameData);
 
             // Update the game for everyone
             var serverMessageLoadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, null, null);
             connections.broadcastToAll(gameId, serverMessageLoadGame);
-
-            if (connections.connections.size() == 1) { return; }
-
-            // Send notification to those connected through web socket
-            var message = String.format("Team %s, %s, moved from %s to %s", teamColor, userName,
-                    getCoordinateFromPosition(move.getStartPosition()), getCoordinateFromPosition(move.getEndPosition()));
-            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, null, message);
-            connections.broadcastAndExcludeOne(gameId, authToken, serverMessageNotification);
         }
         catch (Exception e) {
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, e.getMessage(), null);
